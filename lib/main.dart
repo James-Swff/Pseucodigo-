@@ -1,8 +1,4 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 
 void main() {
   runApp(const PseudoCodeApp());
@@ -40,12 +36,9 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
   late TabController _tabController;
   final TextEditingController _codeController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
-
   final List<Map<String, String>> _consoleLogs = [];
-  final TextEditingController _inputController = TextEditingController();
-  bool _isRunning = false;
 
-  final String _initialCode = """Algoritmo CalcularPromedio
+  final String _initialCode = '''Algoritmo CalcularPromedio
   Definir n1, n2, prom Como Real;
   Escribir "Ingrese nota 1:";
   Leer n1;
@@ -59,7 +52,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
     Escribir "Desaprobado con:";
     Escribir prom;
   FinSi
-FinAlgoritmo""";
+FinAlgoritmo''';
 
   @override
   void initState() {
@@ -73,7 +66,6 @@ FinAlgoritmo""";
     _tabController.dispose();
     _codeController.dispose();
     _focusNode.dispose();
-    _inputController.dispose();
     super.dispose();
   }
 
@@ -94,8 +86,7 @@ FinAlgoritmo""";
   void _runAlgorithm() {
     setState(() {
       _consoleLogs.clear();
-      _isRunning = true;
-      _consoleLogs.add({'type': 'sys', 'text': '--- INICIO DE EJECUCIÓN ---'});
+      _consoleLogs.add({'type': 'sys', 'text': '--- INICIO DE EJECUCION ---'});
     });
 
     final lines = _codeController.text.split('\n');
@@ -121,8 +112,8 @@ FinAlgoritmo""";
       } else if (line.startsWith('Leer')) {
         var varName = line.substring(4).trim();
         if (varName.endsWith(';')) varName = varName.substring(0, varName.length - 1).trim();
-        variables[varName] = 15;
-        _consoleLogs.add({'type': 'in', 'text': '-> [$varName] = 15 (Simulado)'});
+        variables[varName] = 16;
+        _consoleLogs.add({'type': 'in', 'text': '-> [$varName] = 16 (Entrada simulada)'});
       } else if (line.contains('<-')) {
         final parts = line.split('<-');
         final varName = parts[0].trim();
@@ -131,72 +122,9 @@ FinAlgoritmo""";
     }
 
     setState(() {
-      _isRunning = false;
-      _consoleLogs.add({'type': 'sys', 'text': '--- EJECUCIÓN FINALIZADA CON ÉXITO ---'});
+      _consoleLogs.add({'type': 'sys', 'text': '--- EJECUCION FINALIZADA CON EXITO ---'});
       _tabController.animateTo(2);
     });
-  }
-
-  Future<void> _exportPdf() async {
-    final pdf = pw.Document();
-    final code = _codeController.text;
-
-    pdf.addPage(
-      pw.MultiPage(
-        pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(32),
-        build: (pw.Context context) {
-          return [
-            pw.Header(
-              level: 0,
-              child: pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text('Reporte de Algoritmo PSeInt',
-                      style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold, color: PdfColors.blue800)),
-                  pw.Text('PseudoCode Studio', style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700)),
-                ],
-              ),
-            ),
-            pw.SizedBox(height: 12),
-            pw.Text('Pseudocódigo Fuente:',
-                style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 8),
-            pw.Container(
-              padding: const pw.EdgeInsets.all(12),
-              decoration: pw.BoxDecoration(
-                color: PdfColors.grey200,
-                borderRadius: pw.BorderRadius.circular(6),
-              ),
-              child: pw.Text(
-                code,
-                style: const pw.TextStyle(font: pw.Font.courier(), fontSize: 10),
-              ),
-            ),
-            pw.SizedBox(height: 20),
-            pw.Text('Diagrama de Flujo Lógico:',
-                style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 10),
-            pw.Center(
-              child: pw.Container(
-                padding: const pw.EdgeInsets.all(10),
-                decoration: pw.BoxDecoration(
-                  border: pw.Border.all(color: PdfColors.blueGrey, width: 1),
-                  borderRadius: pw.BorderRadius.circular(8),
-                ),
-                child: pw.Text('[ Diagrama vectorial generado automáticamente por la app ]',
-                    style: const pw.TextStyle(color: PdfColors.blueGrey)),
-              ),
-            ),
-          ];
-        },
-      ),
-    );
-
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdf.save(),
-      name: 'Algoritmo_PSeInt.pdf',
-    );
   }
 
   @override
@@ -207,19 +135,14 @@ FinAlgoritmo""";
           children: [
             Icon(Icons.terminal, color: Colors.blueAccent),
             SizedBox(width: 8),
-            Text('PseudoCode Studio', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text('PseudoCode Studio', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
           ],
         ),
         actions: [
           IconButton(
-            tooltip: 'Ejecutar Algoritmo',
+            tooltip: 'Ejecutar',
             icon: const Icon(Icons.play_arrow_rounded, color: Colors.greenAccent, size: 28),
             onPressed: _runAlgorithm,
-          ),
-          IconButton(
-            tooltip: 'Exportar PDF',
-            icon: const Icon(Icons.picture_as_pdf_rounded, color: Colors.orangeAccent),
-            onPressed: _exportPdf,
           ),
         ],
         bottom: TabBar(
@@ -265,7 +188,7 @@ FinAlgoritmo""";
               ),
               decoration: const InputDecoration(
                 border: InputBorder.none,
-                hintText: 'Escribe tu pseudocódigo aquí...',
+                hintText: 'Escribe tu pseudocodigo aqui...',
               ),
             ),
           ),
@@ -415,8 +338,8 @@ FinAlgoritmo""";
         color: bg,
         borderRadius: radius,
         border: Border.all(color: border, width: 1.5),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 4, offset: const Offset(0, 2)),
+        boxShadow: const [
+          BoxShadow(color: Colors.black38, blurRadius: 4, offset: Offset(0, 2)),
         ],
       ),
       child: Text(
@@ -440,7 +363,7 @@ FinAlgoritmo""";
                 children: [
                   Icon(Icons.circle, size: 12, color: Colors.greenAccent),
                   SizedBox(width: 8),
-                  Text('Terminal Móvil', style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text('Terminal Movil', style: TextStyle(fontWeight: FontWeight.bold)),
                 ],
               ),
               IconButton(
@@ -493,25 +416,25 @@ FinAlgoritmo""";
   Widget _buildChallengesTab() {
     final challenges = [
       {
-        'title': '1. Suma de Dos Números',
-        'level': 'Fácil',
-        'desc': 'Pide al usuario ingresar 2 números y muestra el resultado de sumarlos.',
-        'code': """Algoritmo SumaSimple
+        'title': '1. Suma de Dos Numeros',
+        'level': 'Facil',
+        'desc': 'Pide al usuario ingresar 2 numeros y muestra la suma.',
+        'code': '''Algoritmo SumaSimple
   Definir a, b, res Como Entero;
   Escribir "Ingrese primer numero:";
   Leer a;
   Escribir "Ingrese segundo numero:";
   Leer b;
   res <- a + b;
-  Escribir "La suma es: ";
+  Escribir "La suma es:";
   Escribir res;
-FinAlgoritmo"""
+FinAlgoritmo'''
       },
       {
-        'title': '2. Mayor de Tres Números',
+        'title': '2. Mayor de Tres Numeros',
         'level': 'Intermedio',
-        'desc': 'Determina cuál de los tres números ingresados es el mayor usando Si-Entonces.',
-        'code': """Algoritmo MayorDeTres
+        'desc': 'Determina el mayor de tres numeros usando Si-Entonces.',
+        'code': '''Algoritmo MayorDeTres
   Definir a, b, c Como Real;
   Escribir "Ingrese tres valores:";
   Leer a; Leer b; Leer c;
@@ -524,13 +447,13 @@ FinAlgoritmo"""
       Escribir "El mayor es C";
     FinSi
   FinSi
-FinAlgoritmo"""
+FinAlgoritmo'''
       },
       {
-        'title': '3. Tabla de Multiplicar (Bucle)',
+        'title': '3. Tabla de Multiplicar',
         'level': 'Intermedio',
-        'desc': 'Genera la tabla de multiplicar de un número del 1 al 12 con Para.',
-        'code': """Algoritmo TablaMultiplicar
+        'desc': 'Genera la tabla de un numero del 1 al 12.',
+        'code': '''Algoritmo TablaMultiplicar
   Definir num, i, prod Como Entero;
   Escribir "Ingrese tabla deseada:";
   Leer num;
@@ -538,7 +461,7 @@ FinAlgoritmo"""
     prod <- num * i;
     Escribir num, " x ", i, " = ", prod;
   FinPara
-FinAlgoritmo"""
+FinAlgoritmo'''
       },
     ];
 
@@ -547,6 +470,7 @@ FinAlgoritmo"""
       itemCount: challenges.length,
       itemBuilder: (context, i) {
         final item = challenges[i];
+        final isEasy = item['level'] == 'Facil';
         return Card(
           color: const Color(0xFF1B2028),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -562,7 +486,7 @@ FinAlgoritmo"""
                     Text(item['title']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     Chip(
                       label: Text(item['level']!, style: const TextStyle(fontSize: 11)),
-                      backgroundColor: item['level'] == 'Fácil' ? Colors.green.withOpacity(0.2) : Colors.orange.withOpacity(0.2),
+                      backgroundColor: isEasy ? Colors.green.withOpacity(0.2) : Colors.orange.withOpacity(0.2),
                       side: BorderSide.none,
                     ),
                   ],
@@ -578,4 +502,20 @@ FinAlgoritmo"""
                     label: const Text('Cargar al Editor'),
                     onPressed: () {
                       setState(() {
-          
+                        _codeController.text = item['code']!;
+                        _tabController.animateTo(0);
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Reto cargado al editor')),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
