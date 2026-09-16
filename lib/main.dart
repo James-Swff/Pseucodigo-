@@ -188,7 +188,7 @@ FinAlgoritmo"""
           content = content.substring(1, content.length - 1);
           _consoleLogs.add({'type': 'out', 'text': content});
         } else if (vars.containsKey(content)) {
-          _consoleLogs.add({'type': 'out', 'text': '\${vars[content]}'});
+          _consoleLogs.add({'type': 'out', 'text': '${vars[content]}'});
         } else {
           _consoleLogs.add({'type': 'out', 'text': content});
         }
@@ -196,7 +196,7 @@ FinAlgoritmo"""
         var varName = line.substring(4).trim();
         if (varName.endsWith(';')) varName = varName.substring(0, varName.length - 1).trim();
         vars[varName] = 16;
-        _consoleLogs.add({'type': 'in', 'text': '-> [\$varName] = 16 (Entrada simulada)'});
+        _consoleLogs.add({'type': 'in', 'text': '-> [$varName] = 16 (Entrada simulada)'});
       } else if (line.contains('<-')) {
         final parts = line.split('<-');
         final varName = parts[0].trim();
@@ -246,7 +246,7 @@ FinAlgoritmo"""
       } else if (line.startsWith('Leer')) {
         final v = line.replaceAll('Leer', '').replaceAll(';', '').trim();
         _memoryVariables[v] = 18;
-        _consoleLogs.add({'type': 'in', 'text': 'Leido [\$v] <- 18'});
+        _consoleLogs.add({'type': 'in', 'text': 'Leido [$v] <- 18'});
       } else if (line.contains('<-')) {
         final v = line.split('<-')[0].trim();
         _memoryVariables[v] = 'Evaluado';
@@ -269,16 +269,16 @@ FinAlgoritmo"""
           buffer.writeln('\nif __name__ == "__main__":\n    main()');
         } else if (line.startsWith('Escribir')) {
           var c = line.substring(8).replaceAll(';', '').trim();
-          buffer.writeln('    print(\$c)');
+          buffer.writeln('    print($c)');
         } else if (line.startsWith('Leer')) {
           var v = line.substring(4).replaceAll(';', '').trim();
-          buffer.writeln('    \$v = float(input())');
+          buffer.writeln('    $v = float(input())');
         } else if (line.contains('<-')) {
           var parts = line.split('<-');
-          buffer.writeln('    \${parts[0].trim()} = \${parts[1].replaceAll(";", "").trim()}');
+          buffer.writeln('    ${parts[0].trim()} = ${parts[1].replaceAll(";", "").trim()}');
         } else if (line.startsWith('Si') && line.contains('Entonces')) {
           var cond = line.substring(2, line.indexOf('Entonces')).replaceAll('Y', 'and').replaceAll('O', 'or').trim();
-          buffer.writeln('    if \$cond:');
+          buffer.writeln('    if $cond:');
         } else if (line.startsWith('SiNo')) {
           buffer.writeln('    else:');
         } else if (line.startsWith('Para')) {
@@ -291,16 +291,16 @@ FinAlgoritmo"""
         var line = l.trim();
         if (line.startsWith('Escribir')) {
           var c = line.substring(8).replaceAll(';', '').trim();
-          buffer.writeln('    cout << \$c << endl;');
+          buffer.writeln('    cout << $c << endl;');
         } else if (line.startsWith('Leer')) {
           var v = line.substring(4).replaceAll(';', '').trim();
-          buffer.writeln('    cin >> \$v;');
+          buffer.writeln('    cin >> $v;');
         } else if (line.contains('<-')) {
           var parts = line.split('<-');
-          buffer.writeln('    \${parts[0].trim()} = \${parts[1].replaceAll(";", "").trim()};');
+          buffer.writeln('    ${parts[0].trim()} = ${parts[1].replaceAll(";", "").trim()};');
         } else if (line.startsWith('Si') && line.contains('Entonces')) {
           var cond = line.substring(2, line.indexOf('Entonces')).trim();
-          buffer.writeln('    if (\$cond) {');
+          buffer.writeln('    if ($cond) {');
         } else if (line.startsWith('SiNo')) {
           buffer.writeln('    } else {');
         } else if (line.startsWith('FinSi')) {
@@ -314,13 +314,13 @@ FinAlgoritmo"""
         var line = l.trim();
         if (line.startsWith('Escribir')) {
           var c = line.substring(8).replaceAll(';', '').trim();
-          buffer.writeln('        System.out.println(\$c);');
+          buffer.writeln('        System.out.println($c);');
         } else if (line.startsWith('Leer')) {
           var v = line.substring(4).replaceAll(';', '').trim();
-          buffer.writeln('        double \$v = sc.nextDouble();');
+          buffer.writeln('        double $v = sc.nextDouble();');
         } else if (line.contains('<-')) {
           var parts = line.split('<-');
-          buffer.writeln('        \${parts[0].trim()} = \${parts[1].replaceAll(";", "").trim()};');
+          buffer.writeln('        ${parts[0].trim()} = ${parts[1].replaceAll(";", "").trim()};');
         }
       }
       buffer.writeln('    }\n}');
@@ -349,9 +349,9 @@ FinAlgoritmo"""
               child: pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Text('Reporte de Algoritmo y Diagrama PSeInt',
+                  pw.Text('Reporte de Algoritmo - by aethell_labs',
                       style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold, color: PdfColors.blue800)),
-                  pw.Text('PseudoCode Studio Pro', style: const pw.TextStyle(fontSize: 11, color: PdfColors.grey700)),
+                  pw.Text('by aethell_labs', style: const pw.TextStyle(fontSize: 11, color: PdfColors.blueGrey800)),
                 ],
               ),
             ),
@@ -452,7 +452,7 @@ FinAlgoritmo"""
   }
 
   void _saveCurrentAlgorithmDialog() {
-    final nameController = TextEditingController(text: 'Mi Algoritmo \${_savedAlgorithms.length + 1}');
+    final nameController = TextEditingController(text: 'Mi Algoritmo ${_savedAlgorithms.length + 1}');
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -476,7 +476,7 @@ FinAlgoritmo"""
               });
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Guardado como "\${nameController.text}"')),
+                SnackBar(content: Text('Guardado como "${nameController.text}"')),
               );
             },
             child: const Text('Guardar'),
@@ -490,11 +490,18 @@ FinAlgoritmo"""
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
-          children: [
-            Icon(Icons.terminal, color: Colors.blueAccent),
-            SizedBox(width: 8),
-            Text('PseudoCode Pro', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Row(
+              children: [
+                Icon(Icons.terminal, color: Colors.blueAccent, size: 20),
+                SizedBox(width: 6),
+                Text('PseudoCode Pro', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              ],
+            ),
+            Text('by aethell_labs', style: TextStyle(fontSize: 10, color: Colors.cyanAccent, letterSpacing: 0.8)),
           ],
         ),
         actions: [
@@ -553,4 +560,651 @@ FinAlgoritmo"""
   // 1. PESTAÑA DEL EDITOR (CON NÚMEROS DE LÍNEA Y TECLADO FLOTANTE)
   Widget _buildEditorTab() {
     final linesCount = _codeController.text.split('\n').length;
-    final lineNumbersText = List.generate(linesCount, (i) => '\${i + 1}').jo
+    final lineNumbersText = List.generate(linesCount, (i) => '${i + 1}').join('\n');
+
+    return Column(
+      children: [
+        Expanded(
+          child: Container(
+            color: const Color(0xFF14181E),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Gutter con números de línea
+                Container(
+                  width: 42,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  color: const Color(0xFF0D1015),
+                  child: Text(
+                    lineNumbersText,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: _fontSize,
+                      color: Colors.white24,
+                      height: 1.45,
+                    ),
+                  ),
+                ),
+                const VerticalDivider(width: 1, color: Colors.white10),
+                // Área de código
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                    child: TextField(
+                      controller: _codeController,
+                      focusNode: _focusNode,
+                      maxLines: null,
+                      expands: true,
+                      onChanged: (v) => setState(() {}),
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: _fontSize,
+                        color: const Color(0xFFE2E8F0),
+                        height: 1.45,
+                      ),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'Escribe tu algoritmo...',
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        _buildKeyboardToolbar(),
+      ],
+    );
+  }
+
+  // Barra de botones inteligentes (Toolbar de 2 filas)
+  Widget _buildKeyboardToolbar() {
+    return Container(
+      color: const Color(0xFF1A1F26),
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Fila 1: Snippets con autocompletado
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: Row(
+              children: [
+                _shortcutButton('Si', () => _insertText('Si  Entonces\n\t\nFinSi', offset: -16)),
+                _shortcutButton('Para', () => _insertText('Para i <- 1 Hasta  Con Paso 1 Hacer\n\t\nFinPara', offset: -26)),
+                _shortcutButton('Mientras', () => _insertText('Mientras  Hacer\n\t\nFinMientras', offset: -21)),
+                _shortcutButton('Escribir', () => _insertText('Escribir "";', offset: -2)),
+                _shortcutButton('Leer', () => _insertText('Leer ;', offset: -1)),
+                _shortcutButton('Definir', () => _insertText('Definir  Como Entero;', offset: -14)),
+              ],
+            ),
+          ),
+          const Divider(height: 6, color: Colors.white10),
+          // Fila 2: Símbolos clave en 1 toque
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: Row(
+              children: [
+                _symbolButton('<-', () => _insertText(' <- ')),
+                _symbolButton(';', () => _insertText(';')),
+                _symbolButton('""', () => _insertText('""', offset: -1)),
+                _symbolButton('()', () => _insertText('()', offset: -1)),
+                _symbolButton('>=', () => _insertText(' >= ')),
+                _symbolButton('<=', () => _insertText(' <= ')),
+                _symbolButton('==', () => _insertText(' == ')),
+                _symbolButton('Tab', () => _insertText('  ')),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _shortcutButton(String label, VoidCallback onTap) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 3),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF28303B),
+          foregroundColor: Colors.lightBlueAccent,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+          minimumSize: const Size(38, 30),
+        ),
+        onPressed: onTap,
+        child: Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+      ),
+    );
+  }
+
+  Widget _symbolButton(String label, VoidCallback onTap) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 3),
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.white70,
+          side: const BorderSide(color: Colors.white24),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+          minimumSize: const Size(36, 30),
+        ),
+        onPressed: onTap,
+        child: Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+      ),
+    );
+  }
+
+  // 2. PESTAÑA DE DIAGRAMA INTERACTIVO CON FIGURAS PSEINT
+  Widget _buildDiagramTab() {
+    final steps = _codeController.text.split('\n')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty && !e.startsWith('//'))
+        .toList();
+
+    return InteractiveViewer(
+      boundaryMargin: const EdgeInsets.all(120),
+      minScale: 0.3,
+      maxScale: 3.5,
+      child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: steps.asMap().entries.map((entry) {
+              final idx = entry.key;
+              final text = entry.value;
+              final isLast = idx == steps.length - 1;
+
+              return Column(
+                children: [
+                  _renderPseintShape(text),
+                  if (!isLast)
+                    const Column(
+                      children: [
+                        SizedBox(height: 2),
+                        Icon(Icons.arrow_downward_rounded, size: 22, color: Colors.blueAccent),
+                        SizedBox(height: 2),
+                      ],
+                    ),
+                ],
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Renderizado según la figura formal de PSeInt
+  Widget _renderPseintShape(String text) {
+    // A. INICIO / FIN: Cápsula
+    if (text.startsWith('Algoritmo') || text.startsWith('FinAlgoritmo')) {
+      return Container(
+        constraints: const BoxConstraints(minWidth: 170, maxWidth: 260),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E3A5F),
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(color: Colors.blueAccent, width: 2),
+        ),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+        ),
+      );
+    }
+
+    // B. DECISIÓN: Rombo (Si, Mientras)
+    if (text.startsWith('Si') || text.startsWith('Mientras')) {
+      return CustomPaint(
+        painter: DiamondBorderPainter(color: Colors.redAccent),
+        child: ClipPath(
+          clipper: DiamondClipper(),
+          child: Container(
+            width: 250,
+            height: 90,
+            color: const Color(0xFF3D1620),
+            padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 12),
+            alignment: Alignment.center,
+            child: Text(
+              text,
+              textAlign: TextAlign.center,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // C. ENTRADA (Leer): Paralelogramo inclinado
+    if (text.startsWith('Leer')) {
+      return CustomPaint(
+        painter: ParallelogramBorderPainter(color: Colors.tealAccent),
+        child: ClipPath(
+          clipper: ParallelogramClipper(),
+          child: Container(
+            width: 230,
+            color: const Color(0xFF0F3633),
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 10),
+            alignment: Alignment.center,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.arrow_forward_rounded, color: Colors.tealAccent, size: 14),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    text,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // D. SALIDA (Escribir): Trapecio estándar PSeInt
+    if (text.startsWith('Escribir')) {
+      return CustomPaint(
+        painter: TrapezoidBorderPainter(color: Colors.amberAccent),
+        child: ClipPath(
+          clipper: TrapezoidClipper(),
+          child: Container(
+            width: 250,
+            color: const Color(0xFF3B2E05),
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 10),
+            alignment: Alignment.center,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.arrow_outward_rounded, color: Colors.amberAccent, size: 14),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    text,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // E. PROCESO / ASIGNACIÓN: Rectángulo recto
+    return Container(
+      constraints: const BoxConstraints(minWidth: 170, maxWidth: 250),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E242C),
+        border: Border.all(color: Colors.lightBlueAccent, width: 1.8),
+        borderRadius: BorderRadius.zero,
+      ),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  // 3. PESTAÑA DE CONSOLA Y PRUEBA DE ESCRITORIO
+  Widget _buildConsoleTab() {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          color: const Color(0xFF181D24),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal.shade800,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                      minimumSize: const Size(60, 30),
+                    ),
+                    icon: const Icon(Icons.skip_next_rounded, size: 18),
+                    label: Text(_currentStepIndex == -1 ? 'Paso a Paso' : 'Siguiente (${_currentStepIndex + 1})'),
+                    onPressed: _currentStepIndex == -1 ? _startStepByStep : _nextStep,
+                  ),
+                ],
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete_sweep_rounded, color: Colors.white70),
+                onPressed: () => setState(() {
+                  _consoleLogs.clear();
+                  _memoryVariables.clear();
+                  _currentStepIndex = -1;
+                }),
+              ),
+            ],
+          ),
+        ),
+        // Fila de memoria de variables (Prueba de escritorio)
+        if (_memoryVariables.isNotEmpty)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            color: const Color(0xFF102A43),
+            child: Row(
+              children: [
+                const Icon(Icons.memory_rounded, size: 16, color: Colors.cyanAccent),
+                const SizedBox(width: 8),
+                const Text('Memoria: ', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.cyanAccent)),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: _memoryVariables.entries.map((e) {
+                        return Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.black38,
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: Colors.cyanAccent.withOpacity(0.4)),
+                          ),
+                          child: Text('${e.key} = ${e.value}', style: const TextStyle(fontFamily: 'monospace', fontSize: 11, color: Colors.white)),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        // Pantalla de terminal estilo chat
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(12),
+            itemCount: _consoleLogs.length,
+            itemBuilder: (context, i) {
+              final log = _consoleLogs[i];
+              final isSys = log['type'] == 'sys';
+              final isInput = log['type'] == 'in';
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 6),
+                alignment: isInput ? Alignment.centerRight : Alignment.centerLeft,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: isSys
+                        ? Colors.transparent
+                        : isInput
+                            ? const Color(0xFF1565C0)
+                            : const Color(0xFF222832),
+                    borderRadius: BorderRadius.circular(6),
+                    border: isSys ? Border.all(color: Colors.white12) : null,
+                  ),
+                  child: Text(
+                    log['text']!,
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      color: isSys ? Colors.white54 : Colors.white,
+                      fontSize: 12.5,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  // 4. PESTAÑA DE TRADUCCIÓN A LENGUAJES REALES
+  Widget _buildTranslateTab() {
+    return DefaultTabController(
+      length: 3,
+      child: Column(
+        children: [
+          const TabBar(
+            indicatorColor: Colors.cyanAccent,
+            tabs: [
+              Tab(text: 'Python'),
+              Tab(text: 'C++'),
+              Tab(text: 'Java'),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              children: [
+                _codeViewerBox(_translateCode('Python')),
+                _codeViewerBox(_translateCode('C++')),
+                _codeViewerBox(_translateCode('Java')),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _codeViewerBox(String translatedCode) {
+    return Container(
+      color: const Color(0xFF14181E),
+      padding: const EdgeInsets.all(16),
+      child: SingleChildScrollView(
+        child: SelectableText(
+          translatedCode,
+          style: const TextStyle(fontFamily: 'monospace', fontSize: 13, color: Color(0xFF79C0FF), height: 1.45),
+        ),
+      ),
+    );
+  }
+
+  // 5. BANCO DE RETOS Y PROYECTOS GUARDADOS
+  Widget _buildProjectsAndChallengesTab() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(12),
+      itemCount: _savedAlgorithms.length,
+      itemBuilder: (context, i) {
+        final item = _savedAlgorithms[i];
+        final level = item['level'] ?? 'Normal';
+        final isEasy = level == 'Facil';
+        final isAdv = level == 'Avanzado';
+
+        return Card(
+          color: const Color(0xFF181D24),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          margin: const EdgeInsets.only(bottom: 10),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(item['title']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                    Chip(
+                      label: Text(level, style: const TextStyle(fontSize: 10.5)),
+                      backgroundColor: isEasy
+                          ? Colors.green.withOpacity(0.2)
+                          : isAdv
+                              ? Colors.red.withOpacity(0.2)
+                              : Colors.orange.withOpacity(0.2),
+                      side: BorderSide.none,
+                      padding: EdgeInsets.zero,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(item['desc'] ?? '', style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                const SizedBox(height: 10),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1E88E5),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                      minimumSize: const Size(70, 30),
+                    ),
+                    icon: const Icon(Icons.file_upload_outlined, size: 16),
+                    label: const Text('Cargar al Editor', style: TextStyle(fontSize: 12)),
+                    onPressed: () {
+                      setState(() {
+                        _codeController.text = item['code']!;
+                        _tabController.animateTo(0);
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Cargado: ${item['title']}')),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// FIGURAS GEOMÉTRICAS Y BORDES OFICIALES DE PSEINT
+// ---------------------------------------------------------------------------
+
+// 1. ROMBO (DECISIÓN: Si / Mientras)
+class DiamondClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    return Path()
+      ..moveTo(size.width / 2, 0)
+      ..lineTo(size.width, size.height / 2)
+      ..lineTo(size.width / 2, size.height)
+      ..lineTo(0, size.height / 2)
+      ..close();
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+}
+
+class DiamondBorderPainter extends CustomPainter {
+  final Color color;
+  DiamondBorderPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke;
+
+    final path = Path()
+      ..moveTo(size.width / 2, 0)
+      ..lineTo(size.width, size.height / 2)
+      ..lineTo(size.width / 2, size.height)
+      ..lineTo(0, size.height / 2)
+      ..close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldPainter) => false;
+}
+
+// 2. PARALELOGRAMO (ENTRADA: Leer)
+class ParallelogramClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    const slant = 18.0;
+    return Path()
+      ..moveTo(slant, 0)
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width - slant, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+}
+
+class ParallelogramBorderPainter extends CustomPainter {
+  final Color color;
+  ParallelogramBorderPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const slant = 18.0;
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke;
+
+    final path = Path()
+      ..moveTo(slant, 0)
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width - slant, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldPainter) => false;
+}
+
+// 3. TRAPECIO (SALIDA: Escribir - Norma PSeInt)
+class TrapezoidClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    const slant = 18.0;
+    return Path()
+      ..moveTo(slant, 0)
+      ..lineTo(size.width - slant, 0)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+}
+
+class TrapezoidBorderPainter extends CustomPainter {
+  final Color color;
+  TrapezoidBorderPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const slant = 18.0;
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke;
+
+    final path = Path()
+      ..moveTo(slant, 0)
+      ..lineTo(size.width - slant, 0)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldPainter) => false;
+}
