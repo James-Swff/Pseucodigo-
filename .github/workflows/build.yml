@@ -23,14 +23,23 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Crear carpeta Android si falta
-        run: flutter create --platforms=android .
+      - name: Crear carpeta Android sin tocar lib
+        run: |
+          mkdir -p .backup
+          cp -r lib/* .backup/ || true
+          flutter create --platforms=android .
+          rm -rf lib/*
+          cp -r .backup/* lib/ || true
+          rm -rf .backup
 
       - name: Instalar dependencias
         run: flutter pub get
 
       - name: Generar icono personalizado
-        run: dart run flutter_launcher_icons
+        run: |
+          if [ -f "app_icon.png" ]; then
+            dart run flutter_launcher_icons
+          fi
 
       - name: Compilar APK
         run: flutter build apk --release --no-tree-shake-icons
@@ -40,3 +49,4 @@ jobs:
         with:
           name: pseudocode-pro-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+          
