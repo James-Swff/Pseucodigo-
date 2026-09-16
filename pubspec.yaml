@@ -10,11 +10,21 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.6
+  pdf: ^3.10.8
+  printing: ^5.12.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "app_icon.png"
+  adaptive_icon_background: "#0D1117"
+  adaptive_icon_foreground: "app_icon.png"
 
 flutter:
   uses-material-design: true
