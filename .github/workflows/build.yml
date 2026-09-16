@@ -23,17 +23,20 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Crear carpeta Android faltante
+      - name: Crear carpeta Android si falta
         run: flutter create --platforms=android .
 
       - name: Instalar dependencias
         run: flutter pub get
 
-      - name: Generar APK
+      - name: Generar icono personalizado
+        run: dart run flutter_launcher_icons
+
+      - name: Compilar APK
         run: flutter build apk --release --no-tree-shake-icons
 
       - name: Subir instalador APK
         uses: actions/upload-artifact@v4
         with:
-          name: pseudocode-app
+          name: pseudocode-pro-apk
           path: build/app/outputs/flutter-apk/app-release.apk
