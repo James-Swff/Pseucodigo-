@@ -26,7 +26,7 @@ jobs:
       - name: Crear estructura base Android
         run: flutter create --platforms=android .
 
-      - name: Escribir aplicacion PSeInt con Figuras Vectoriales en PDF
+      - name: Escribir aplicacion PSeInt con Motor Matematico Real
         run: |
           mkdir -p lib
           cat << 'EOF' > lib/main.dart
@@ -101,22 +101,47 @@ jobs:
           FinAlgoritmo"""
               },
               {
-                'title': '2. Mayor de Tres Numeros',
+                'title': '2. Planilla de Sueldo y Horas Extras',
                 'level': 'Intermedio',
-                'desc': 'Evalua tres valores con condicionales Si-Entonces anidados.',
-                'code': """Algoritmo MayorDeTres
-            Definir a, b, c Como Real;
-            Escribir "Ingrese tres valores:";
-            Leer a; Leer b; Leer c;
-            Si a > b Y a > c Entonces
-              Escribir "El mayor es A";
+                'desc': 'Calcula horas extras al 150%, descuento de ley y sueldo neto.',
+                'code': """Algoritmo CalcularPlanilla
+            Definir horasTrabajadas Como Entero;
+            Definir pagoPorHora, sueldoBruto, horasExtras, pagoExtras Como Real;
+            Definir descuentoSalud, bonificacion, sueldoNeto Como Real;
+
+            Escribir "Ingrese horas trabajadas:";
+            Leer horasTrabajadas;
+            Escribir "Ingrese pago por hora:";
+            Leer pagoPorHora;
+
+            Si horasTrabajadas > 40 Entonces
+              horasExtras <- horasTrabajadas - 40;
+              pagoExtras <- horasExtras * (pagoPorHora * 1.5);
+              sueldoBruto <- (40 * pagoPorHora) + pagoExtras;
             SiNo
-              Si b > c Entonces
-                Escribir "El mayor es B";
-              SiNo
-                Escribir "El mayor es C";
-              FinSi
+              horasExtras <- 0;
+              pagoExtras <- 0;
+              sueldoBruto <- horasTrabajadas * pagoPorHora;
             FinSi
+
+            descuentoSalud <- sueldoBruto * 0.09;
+
+            Si sueldoBruto < 1200 Entonces
+              bonificacion <- 100;
+            SiNo
+              bonificacion <- 50;
+            FinSi
+
+            sueldoNeto <- (sueldoBruto - descuentoSalud) + bonificacion;
+
+            Escribir "Sueldo Bruto:";
+            Escribir sueldoBruto;
+            Escribir "Descuento Salud (9%):";
+            Escribir descuentoSalud;
+            Escribir "Bonificacion:";
+            Escribir bonificacion;
+            Escribir "Sueldo Neto a Pagar:";
+            Escribir sueldoNeto;
           FinAlgoritmo"""
               },
               {
@@ -138,36 +163,6 @@ jobs:
               Escribir prom;
             FinSi
           FinAlgoritmo"""
-              },
-              {
-                'title': '4. Tabla de Multiplicar',
-                'level': 'Intermedio',
-                'desc': 'Genera iteraciones del 1 al 12 con bucle Para.',
-                'code': """Algoritmo TablaMultiplicar
-            Definir num, i, prod Como Entero;
-            Escribir "Ingrese tabla deseada:";
-            Leer num;
-            Para i <- 1 Hasta 12 Con Paso 1 Hacer
-              prod <- num * i;
-              Escribir num, " x ", i, " = ", prod;
-            FinPara
-          FinAlgoritmo"""
-              },
-              {
-                'title': '5. Factorial de un Numero',
-                'level': 'Avanzado',
-                'desc': 'Calcula el acumulado factorial con ciclo Para.',
-                'code': """Algoritmo FactorialNumero
-            Definir n, f, i Como Entero;
-            Escribir "Ingrese entero positivo:";
-            Leer n;
-            f <- 1;
-            Para i <- 1 Hasta n Con Paso 1 Hacer
-              f <- f * i;
-            FinPara
-            Escribir "El factorial es:";
-            Escribir f;
-          FinAlgoritmo"""
               }
             ];
 
@@ -175,7 +170,7 @@ jobs:
             void initState() {
               super.initState();
               _tabController = TabController(length: 5, vsync: this);
-              _codeController.text = _savedAlgorithms[0]['code']!;
+              _codeController.text = _savedAlgorithms[1]['code']!;
               _validateSyntax();
             }
 
@@ -236,6 +231,97 @@ jobs:
               _focusNode.requestFocus();
             }
 
+            // Motor de Evaluación Matemática y Lógica
+            double _evalMath(String expr, Map<String, dynamic> vars) {
+              String clean = expr.trim();
+              if (clean.endsWith(';')) clean = clean.substring(0, clean.length - 1).trim();
+
+              final sortedKeys = vars.keys.toList()..sort((a, b) => b.length.compareTo(a.length));
+              for (final key in sortedKeys) {
+                clean = clean.replaceAll(RegExp('\\b' + RegExp.escape(key) + '\\b'), vars[key].toString());
+              }
+
+              try {
+                return _parseArithmetic(clean);
+              } catch (e) {
+                return double.tryParse(clean) ?? 0.0;
+              }
+            }
+
+            double _parseArithmetic(String str) {
+              List<String> tokens = [];
+              String current = '';
+              for (int i = 0; i < str.length; i++) {
+                String c = str[i];
+                if ('+-*/()'.contains(c)) {
+                  if (current.trim().isNotEmpty) tokens.add(current.trim());
+                  tokens.add(c);
+                  current = '';
+                } else {
+                  current += c;
+                }
+              }
+              if (current.trim().isNotEmpty) tokens.add(current.trim());
+
+              int pos = 0;
+              double parsePrimary() {
+                if (pos >= tokens.length) return 0.0;
+                String tok = tokens[pos++];
+                if (tok == '(') {
+                  double val = parseAddSub();
+                  if (pos < tokens.length && tokens[pos] == ')') pos++;
+                  return val;
+                } else if (tok == '-') {
+                  return -parsePrimary();
+                }
+                return double.tryParse(tok) ?? 0.0;
+              }
+
+              double parseMulDiv() {
+                double left = parsePrimary();
+                while (pos < tokens.length && (tokens[pos] == '*' || tokens[pos] == '/')) {
+                  String op = tokens[pos++];
+                  double right = parsePrimary();
+                  if (op == '*') left *= right;
+                  else if (op == '/') left = right != 0 ? left / right : 0.0;
+                }
+                return left;
+              }
+
+              double parseAddSub() {
+                double left = parseMulDiv();
+                while (pos < tokens.length && (tokens[pos] == '+' || tokens[pos] == '-')) {
+                  String op = tokens[pos++];
+                  double right = parseMulDiv();
+                  if (op == '+') left += right;
+                  else if (op == '-') left -= right;
+                }
+                return left;
+              }
+
+              return parseAddSub();
+            }
+
+            bool _evalCondition(String cond, Map<String, dynamic> vars) {
+              String c = cond.trim();
+              for (String op in ['>=', '<=', '==', '!=', '>', '<']) {
+                if (c.contains(op)) {
+                  final parts = c.split(op);
+                  final left = _evalMath(parts[0], vars);
+                  final right = _evalMath(parts[1], vars);
+                  switch (op) {
+                    case '>=': return left >= right;
+                    case '<=': return left <= right;
+                    case '==': return left == right;
+                    case '!=': return left != right;
+                    case '>': return left > right;
+                    case '<': return left < right;
+                  }
+                }
+              }
+              return true;
+            }
+
             void _runAlgorithm() {
               _validateSyntax();
               setState(() {
@@ -248,11 +334,50 @@ jobs:
               final lines = _codeController.text.split('\n');
               final Map<String, dynamic> vars = {};
 
+              // Valores predeterminados congruentes para variables de prueba comunes
+              Map<String, double> sampleInputs = {
+                'horastrabajadas': 48.0,
+                'pagoporhora': 25.0,
+                'a': 20.0,
+                'b': 15.0,
+                'c': 35.0,
+                'ep': 14.0,
+                'ef': 16.0,
+                'num': 7.0,
+                'n': 5.0,
+              };
+
+              bool skipBranch = false;
+              List<bool> conditionStack = [];
+
               for (var rawLine in lines) {
                 final line = rawLine.trim();
                 if (line.isEmpty || line.startsWith('//') || line.startsWith('Algoritmo') || line.startsWith('FinAlgoritmo')) {
                   continue;
                 }
+
+                if (line.startsWith('Si ') && line.contains('Entonces')) {
+                  String condText = line.substring(3, line.indexOf('Entonces')).trim();
+                  bool condResult = _evalCondition(condText, vars);
+                  conditionStack.add(condResult);
+                  skipBranch = !condResult;
+                  continue;
+                }
+
+                if (line.startsWith('SiNo')) {
+                  if (conditionStack.isNotEmpty) {
+                    skipBranch = conditionStack.last;
+                  }
+                  continue;
+                }
+
+                if (line.startsWith('FinSi')) {
+                  if (conditionStack.isNotEmpty) conditionStack.removeLast();
+                  skipBranch = conditionStack.isNotEmpty ? !conditionStack.last : false;
+                  continue;
+                }
+
+                if (skipBranch) continue;
 
                 if (line.startsWith('Escribir')) {
                   var content = line.substring(8).trim();
@@ -261,25 +386,33 @@ jobs:
                     content = content.substring(1, content.length - 1);
                     _consoleLogs.add({'type': 'out', 'text': content});
                   } else if (vars.containsKey(content)) {
-                    _consoleLogs.add({'type': 'out', 'text': '${vars[content]}'});
+                    var val = vars[content];
+                    String printVal = (val is double && val == val.roundToDouble()) ? '${val.toInt()}' : '$val';
+                    _consoleLogs.add({'type': 'out', 'text': printVal});
                   } else {
-                    _consoleLogs.add({'type': 'out', 'text': content});
+                    double calc = _evalMath(content, vars);
+                    String printVal = (calc == calc.roundToDouble()) ? '${calc.toInt()}' : '$calc';
+                    _consoleLogs.add({'type': 'out', 'text': printVal});
                   }
                 } else if (line.startsWith('Leer')) {
                   var varName = line.substring(4).trim();
                   if (varName.endsWith(';')) varName = varName.substring(0, varName.length - 1).trim();
-                  vars[varName] = 16;
-                  _consoleLogs.add({'type': 'in', 'text': '-> [$varName] = 16 (Simulado)'});
+                  double val = sampleInputs[varName.toLowerCase()] ?? 25.0;
+                  vars[varName] = val;
+                  String printVal = (val == val.roundToDouble()) ? '${val.toInt()}' : '$val';
+                  _consoleLogs.add({'type': 'in', 'text': '-> [$varName] = $printVal (Entrada simulada)'});
                 } else if (line.contains('<-')) {
                   final parts = line.split('<-');
                   final varName = parts[0].trim();
-                  vars[varName] = 32;
+                  final expr = parts[1].trim();
+                  double result = _evalMath(expr, vars);
+                  vars[varName] = (result == result.roundToDouble()) ? result.toInt() : double.parse(result.toStringAsFixed(2));
                 }
               }
 
               setState(() {
                 _memoryVariables = vars;
-                _consoleLogs.add({'type': 'sys', 'text': '--- EJECUCION COMPLETADA ---'});
+                _consoleLogs.add({'type': 'sys', 'text': '--- EJECUCION COMPLETADA CON EXITO ---'});
                 _tabController.animateTo(2);
               });
             }
@@ -317,11 +450,13 @@ jobs:
                   _consoleLogs.add({'type': 'out', 'text': line.replaceAll(';', '')});
                 } else if (line.startsWith('Leer')) {
                   final v = line.replaceAll('Leer', '').replaceAll(';', '').trim();
-                  _memoryVariables[v] = 18;
-                  _consoleLogs.add({'type': 'in', 'text': 'Leido [$v] <- 18'});
+                  _memoryVariables[v] = 48;
+                  _consoleLogs.add({'type': 'in', 'text': 'Leido [$v] <- 48'});
                 } else if (line.contains('<-')) {
-                  final v = line.split('<-')[0].trim();
-                  _memoryVariables[v] = 'Calculado';
+                  final parts = line.split('<-');
+                  final v = parts[0].trim();
+                  double res = _evalMath(parts[1], _memoryVariables);
+                  _memoryVariables[v] = (res == res.roundToDouble()) ? res.toInt() : double.parse(res.toStringAsFixed(2));
                 }
               });
             }
@@ -371,13 +506,11 @@ jobs:
               return buffer.toString();
             }
 
-            // DIBUJADO VECTORIAL REAL DE FIGURAS PSEINT EN EL PDF
             pw.Widget _buildPdfPseintShape(String text) {
               const double width = 260;
               const double height = 36;
 
               if (text.startsWith('Algoritmo') || text.startsWith('FinAlgoritmo')) {
-                // Cápsula de Inicio / Fin
                 return pw.Stack(
                   alignment: pw.Alignment.center,
                   children: [
@@ -401,7 +534,6 @@ jobs:
                   ],
                 );
               } else if (text.startsWith('Leer')) {
-                // Paralelogramo de Entrada
                 const double slant = 18;
                 return pw.Stack(
                   alignment: pw.Alignment.center,
@@ -430,7 +562,6 @@ jobs:
                   ],
                 );
               } else if (text.startsWith('Escribir')) {
-                // Trapecio de Salida
                 const double slant = 18;
                 return pw.Stack(
                   alignment: pw.Alignment.center,
@@ -459,7 +590,6 @@ jobs:
                   ],
                 );
               } else if (text.startsWith('Si') || text.startsWith('Mientras')) {
-                // Rombo de Decisión
                 const double rHeight = 44;
                 return pw.Stack(
                   alignment: pw.Alignment.center,
@@ -488,7 +618,6 @@ jobs:
                   ],
                 );
               } else {
-                // Rectángulo de Proceso / Asignación
                 return pw.Stack(
                   alignment: pw.Alignment.center,
                   children: [
@@ -1126,7 +1255,6 @@ jobs:
                       itemBuilder: (context, i) {
                         final log = _consoleLogs[i];
                         final isSys = log['type'] == 'sys';
-                        final isWarn = log['type'] == 'warn';
                         final isInput = log['type'] == 'in';
 
                         return Container(
@@ -1137,11 +1265,9 @@ jobs:
                             decoration: BoxDecoration(
                               color: isSys
                                   ? Colors.transparent
-                                  : isWarn
-                                      ? Colors.amber.shade900.withOpacity(0.4)
-                                      : isInput
-                                          ? const Color(0xFF1565C0)
-                                          : const Color(0xFF222832),
+                                  : isInput
+                                      ? const Color(0xFF1565C0)
+                                      : const Color(0xFF222832),
                               borderRadius: BorderRadius.circular(6),
                               border: isSys ? Border.all(color: Colors.white12) : null,
                             ),
@@ -1149,11 +1275,7 @@ jobs:
                               log['text']!,
                               style: TextStyle(
                                 fontFamily: 'monospace',
-                                color: isSys
-                                    ? Colors.white54
-                                    : isWarn
-                                        ? Colors.amberAccent
-                                        : Colors.white,
+                                color: isSys ? Colors.white54 : Colors.white,
                                 fontSize: 12.5,
                               ),
                             ),
