@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -45,6 +46,12 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
   Map<String, dynamic> _memoryVariables = {};
   int _currentStepIndex = -1;
   List<String> _stepLines = [];
+  List<String> _syntaxErrors = [];
+
+  // Datos para el membrete universitario
+  String _studentName = 'Estudiante';
+  String _courseName = 'Algoritmos y Programacion';
+  String _sectionCode = 'Facultad de Ingenieria';
 
   final List<Map<String, String>> _savedAlgorithms = [
     {
@@ -65,7 +72,7 @@ FinAlgoritmo"""
     {
       'title': '2. Mayor de Tres Numeros',
       'level': 'Intermedio',
-      'desc': 'Evalua tres numeros con condicionales Si-Entonces anidados.',
+      'desc': 'Evalua tres valores con condicionales Si-Entonces anidados.',
       'code': """Algoritmo MayorDeTres
   Definir a, b, c Como Real;
   Escribir "Ingrese tres valores:";
@@ -82,21 +89,21 @@ FinAlgoritmo"""
 FinAlgoritmo"""
     },
     {
-      'title': '3. Calcular Promedio y Estado',
+      'title': '3. Promedio y Estado Academico',
       'level': 'Intermedio',
-      'desc': 'Calcula la media de notas y determina si aprobo o desaprobo.',
-      'code': """Algoritmo CalcularPromedio
-  Definir n1, n2, prom Como Real;
-  Escribir "Ingrese nota 1:";
-  Leer n1;
-  Escribir "Ingrese nota 2:";
-  Leer n2;
-  prom <- (n1 + n2) / 2;
+      'desc': 'Calcula nota final y determina si aprobo (>= 11) o desaprobo.',
+      'code': """Algoritmo EvaluacionFinal
+  Definir ep, ef, prom Como Real;
+  Escribir "Ingrese Examen Parcial:";
+  Leer ep;
+  Escribir "Ingrese Examen Final:";
+  Leer ef;
+  prom <- (ep + ef) / 2;
   Si prom >= 11 Entonces
-    Escribir "Aprobado con nota:";
+    Escribir "Condicion: APROBADO con nota:";
     Escribir prom;
   SiNo
-    Escribir "Desaprobado con nota:";
+    Escribir "Condicion: DESAPROBADO con nota:";
     Escribir prom;
   FinSi
 FinAlgoritmo"""
@@ -104,7 +111,7 @@ FinAlgoritmo"""
     {
       'title': '4. Tabla de Multiplicar',
       'level': 'Intermedio',
-      'desc': 'Genera la tabla de multiplicar del 1 al 12 con bucle Para.',
+      'desc': 'Genera iteraciones del 1 al 12 con bucle Para.',
       'code': """Algoritmo TablaMultiplicar
   Definir num, i, prod Como Entero;
   Escribir "Ingrese tabla deseada:";
@@ -118,16 +125,16 @@ FinAlgoritmo"""
     {
       'title': '5. Factorial de un Numero',
       'level': 'Avanzado',
-      'desc': 'Calcula el producto factorial acumulativo con bucle iterativo.',
+      'desc': 'Calcula la multiplicatoria acumulada con ciclo iterativo.',
       'code': """Algoritmo FactorialNumero
   Definir n, f, i Como Entero;
-  Escribir "Ingrese un entero positivo:";
+  Escribir "Ingrese entero positivo:";
   Leer n;
   f <- 1;
   Para i <- 1 Hasta n Con Paso 1 Hacer
     f <- f * i;
   FinPara
-  Escribir "El factorial es:";
+  Escribir "El factorial acumulado es:";
   Escribir f;
 FinAlgoritmo"""
     }
@@ -137,7 +144,8 @@ FinAlgoritmo"""
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
-    _codeController.text = _savedAlgorithms[1]['code']!;
+    _codeController.text = _savedAlgorithms[0]['code']!;
+    _validateSyntax();
   }
 
   @override
@@ -146,6 +154,47 @@ FinAlgoritmo"""
     _codeController.dispose();
     _focusNode.dispose();
     super.dispose();
+  }
+
+  // Validador de Sintaxis PSeInt
+  void _validateSyntax() {
+    final text = _codeController.text;
+    final lines = text.split('\n');
+    final List<String> errors = [];
+
+    int openSi = 0;
+    int openPara = 0;
+    int openMientras = 0;
+
+    for (int i = 0; i < lines.length; i++) {
+      final line = lines[i].trim();
+      if (line.isEmpty || line.startsWith('//')) continue;
+
+      if (line.startsWith('Si ') && line.contains('Entonces')) openSi++;
+      if (line.startsWith('FinSi')) openSi--;
+
+      if (line.startsWith('Para ') && line.contains('Hacer')) openPara++;
+      if (line.startsWith('FinPara')) openPara--;
+
+      if (line.startsWith('Mientras ') && line.contains('Hacer')) openMientras++;
+      if (line.startsWith('FinMientras')) openMientras--;
+
+      if ((line.startsWith('Definir') || line.startsWith('Leer') || line.startsWith('Escribir') || line.contains('<-')) && !line.endsWith(';')) {
+        errors.add('Línea ${i + 1}: Posible falta de ";" al final.');
+      }
+    }
+
+    if (openSi > 0) errors.add('Estructura: Hay $openSi bloque(s) "Si" sin cerrar con "FinSi".');
+    if (openSi < 0) errors.add('Estructura: Sobra un "FinSi" en el código.');
+
+    if (openPara > 0) errors.add('Estructura: Hay $openPara bucle(s) "Para" sin cerrar con "FinPara".');
+    if (openPara < 0) errors.add('Estructura: Sobra un "FinPara" en el código.');
+
+    if (openMientras > 0) errors.add('Estructura: Hay bucle "Mientras" sin cerrar con "FinMientras".');
+
+    setState(() {
+      _syntaxErrors = errors;
+    });
   }
 
   void _insertText(String text, {int offset = 0}) {
@@ -159,15 +208,20 @@ FinAlgoritmo"""
       text: newText,
       selection: TextSelection.collapsed(offset: start + text.length + offset),
     );
+    _validateSyntax();
     _focusNode.requestFocus();
   }
 
   void _runAlgorithm() {
+    _validateSyntax();
     setState(() {
       _consoleLogs.clear();
       _memoryVariables.clear();
       _currentStepIndex = -1;
       _consoleLogs.add({'type': 'sys', 'text': '--- INICIO DE EJECUCION ---'});
+      if (_syntaxErrors.isNotEmpty) {
+        _consoleLogs.add({'type': 'warn', 'text': '[AVISO] Advertencias de sintaxis detectadas.'});
+      }
     });
 
     final lines = _codeController.text.split('\n');
@@ -198,7 +252,7 @@ FinAlgoritmo"""
       } else if (line.contains('<-')) {
         final parts = line.split('<-');
         final varName = parts[0].trim();
-        vars[varName] = 45;
+        vars[varName] = 32;
       }
     }
 
@@ -246,7 +300,7 @@ FinAlgoritmo"""
         _consoleLogs.add({'type': 'in', 'text': 'Leido [$v] <- 18'});
       } else if (line.contains('<-')) {
         final v = line.split('<-')[0].trim();
-        _memoryVariables[v] = 'Evaluado';
+        _memoryVariables[v] = 'Calculado';
       }
     });
   }
@@ -324,11 +378,11 @@ FinAlgoritmo"""
     return buffer.toString();
   }
 
-  Future<void> _exportPdf() async {
+  // Generador del PDF con Membrete Universitario Completo
+  Future<pw.Document> _buildAcademicPdf() async {
     final pdf = pw.Document();
     final code = _codeController.text;
-    final lines = code.split('\n');
-    final steps = lines
+    final steps = code.split('\n')
         .map((e) => e.trim())
         .where((e) => e.isNotEmpty && !e.startsWith('//'))
         .toList();
@@ -336,27 +390,47 @@ FinAlgoritmo"""
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(28),
+        margin: const pw.EdgeInsets.all(26),
         build: (pw.Context context) {
           return [
-            pw.Header(
-              level: 0,
+            // Membrete Academico
+            pw.Container(
+              padding: const pw.EdgeInsets.all(10),
+              decoration: pw.BoxDecoration(
+                border: pw.Border.all(color: PdfColors.blue800, width: 1.5),
+                borderRadius: pw.BorderRadius.circular(6),
+                color: PdfColors.blue50,
+              ),
               child: pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Text('Reporte de Algoritmo - by aethell_labs',
-                      style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold, color: PdfColors.blue800)),
-                  pw.Text('by aethell_labs', style: const pw.TextStyle(fontSize: 11, color: PdfColors.blueGrey800)),
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text('REPORTE ACADEMICO DE ALGORITMOS',
+                          style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold, color: PdfColors.blue900)),
+                      pw.SizedBox(height: 3),
+                      pw.Text('Alumno: $_studentName', style: const pw.TextStyle(fontSize: 10, color: PdfColors.black)),
+                      pw.Text('Curso: $_courseName', style: const pw.TextStyle(fontSize: 9.5, color: PdfColors.grey800)),
+                      pw.Text('Detalle: $_sectionCode', style: const pw.TextStyle(fontSize: 9.5, color: PdfColors.grey800)),
+                    ],
+                  ),
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    children: [
+                      pw.Text('PseudoCode Pro', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColors.blue800)),
+                      pw.Text('by aethell_labs', style: const pw.TextStyle(fontSize: 9.5, color: PdfColors.teal900)),
+                    ],
+                  ),
                 ],
               ),
             ),
-            pw.SizedBox(height: 8),
-            pw.Text('1. Pseudocodigo Fuente:',
-                style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 6),
+            pw.SizedBox(height: 12),
+            pw.Text('1. Pseudocodigo Fuente:', style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+            pw.SizedBox(height: 5),
             pw.Container(
               width: double.infinity,
-              padding: const pw.EdgeInsets.all(10),
+              padding: const pw.EdgeInsets.all(8),
               decoration: pw.BoxDecoration(
                 color: PdfColors.grey100,
                 borderRadius: pw.BorderRadius.circular(4),
@@ -367,10 +441,10 @@ FinAlgoritmo"""
                 style: pw.TextStyle(font: pw.Font.courier(), fontSize: 9.5),
               ),
             ),
-            pw.SizedBox(height: 18),
+            pw.SizedBox(height: 14),
             pw.Text('2. Diagrama de Flujo Logico (Figuras Geometricas PSeInt):',
-                style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 10),
+                style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+            pw.SizedBox(height: 8),
             pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.center,
               children: steps.asMap().entries.map((entry) {
@@ -427,7 +501,7 @@ FinAlgoritmo"""
                       ),
                       if (!isLast)
                         pw.Padding(
-                          padding: const pw.EdgeInsets.symmetric(vertical: 2.5),
+                          padding: const pw.EdgeInsets.symmetric(vertical: 2),
                           child: pw.Text('|\nv', style: const pw.TextStyle(fontSize: 7.5, color: PdfColors.blue700)),
                         ),
                     ],
@@ -439,42 +513,63 @@ FinAlgoritmo"""
         },
       ),
     );
-
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdf.save(),
-      name: 'Algoritmo_PSeInt.pdf',
-    );
+    return pdf;
   }
 
-  void _saveCurrentAlgorithmDialog() {
-    final nameController = TextEditingController(text: 'Mi Algoritmo ${_savedAlgorithms.length + 1}');
+  // Diálogo para editar datos del membrete antes de exportar
+  void _showStudentHeaderDialog({required bool isShare}) {
+    final nameCtrl = TextEditingController(text: _studentName);
+    final courseCtrl = TextEditingController(text: _courseName);
+    final sectionCtrl = TextEditingController(text: _sectionCode);
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF1B2028),
-        title: const Text('Guardar Algoritmo Local'),
-        content: TextField(
-          controller: nameController,
-          decoration: const InputDecoration(labelText: 'Nombre del archivo'),
+        title: const Text('Datos para el Membrete'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameCtrl,
+                decoration: const InputDecoration(labelText: 'Nombre del Alumno'),
+              ),
+              TextField(
+                controller: courseCtrl,
+                decoration: const InputDecoration(labelText: 'Curso / Taller'),
+              ),
+              TextField(
+                controller: sectionCtrl,
+                decoration: const InputDecoration(labelText: 'Sección / Grupo / Universidad'),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
           ElevatedButton(
-            onPressed: () {
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1E88E5)),
+            onPressed: () async {
               setState(() {
-                _savedAlgorithms.add({
-                  'title': nameController.text.trim(),
-                  'level': 'Personal',
-                  'desc': 'Algoritmo personalizado guardado por el usuario.',
-                  'code': _codeController.text,
-                });
+                _studentName = nameCtrl.text.trim();
+                _courseName = courseCtrl.text.trim();
+                _sectionCode = sectionCtrl.text.trim();
               });
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Guardado como "${nameController.text}"')),
-              );
+
+              final pdf = await _buildAcademicPdf();
+              if (isShare) {
+                final bytes = await pdf.save();
+                await Printing.sharePdf(bytes: bytes, filename: 'Algoritmo_PSeInt_aethell_labs.pdf');
+              } else {
+                await Printing.layoutPdf(
+                  onLayout: (PdfPageFormat format) async => pdf.save(),
+                  name: 'Algoritmo_PSeInt_aethell_labs.pdf',
+                );
+              }
             },
-            child: const Text('Guardar'),
+            child: Text(isShare ? 'Compartir' : 'Generar PDF'),
           ),
         ],
       ),
@@ -511,14 +606,14 @@ FinAlgoritmo"""
             onPressed: () => setState(() => _fontSize = (_fontSize - 1).clamp(10.0, 24.0)),
           ),
           IconButton(
-            tooltip: 'Guardar archivo',
-            icon: const Icon(Icons.save_rounded, color: Colors.cyanAccent),
-            onPressed: _saveCurrentAlgorithmDialog,
+            tooltip: 'Compartir a WhatsApp / Redes',
+            icon: const Icon(Icons.share_rounded, color: Colors.greenAccent),
+            onPressed: () => _showStudentHeaderDialog(isShare: true),
           ),
           IconButton(
-            tooltip: 'Exportar PDF',
+            tooltip: 'Exportar PDF Académico',
             icon: const Icon(Icons.picture_as_pdf_rounded, color: Colors.orangeAccent),
-            onPressed: _exportPdf,
+            onPressed: () => _showStudentHeaderDialog(isShare: false),
           ),
           IconButton(
             tooltip: 'Ejecutar',
@@ -530,12 +625,19 @@ FinAlgoritmo"""
           controller: _tabController,
           indicatorColor: Colors.blueAccent,
           isScrollable: true,
-          tabs: const [
-            Tab(icon: Icon(Icons.code), text: 'Editor'),
-            Tab(icon: Icon(Icons.schema_rounded), text: 'Diagrama PSeInt'),
-            Tab(icon: Icon(Icons.dvr_rounded), text: 'Consola / Memoria'),
-            Tab(icon: Icon(Icons.transform_rounded), text: 'Traducir'),
-            Tab(icon: Icon(Icons.folder_open_rounded), text: 'Retos & Proyectos'),
+          tabs: [
+            Tab(
+              icon: Badge(
+                isLabelVisible: _syntaxErrors.isNotEmpty,
+                label: Text('${_syntaxErrors.length}'),
+                child: const Icon(Icons.code),
+              ),
+              text: 'Editor',
+            ),
+            const Tab(icon: Icon(Icons.schema_rounded), text: 'Diagrama PSeInt'),
+            const Tab(icon: Icon(Icons.dvr_rounded), text: 'Consola / Memoria'),
+            const Tab(icon: Icon(Icons.transform_rounded), text: 'Traducir'),
+            const Tab(icon: Icon(Icons.folder_open_rounded), text: 'Retos'),
           ],
         ),
       ),
@@ -546,18 +648,38 @@ FinAlgoritmo"""
           _buildDiagramTab(),
           _buildConsoleTab(),
           _buildTranslateTab(),
-          _buildProjectsAndChallengesTab(),
+          _buildChallengesTab(),
         ],
       ),
     );
   }
 
+  // 1. PESTAÑA DEL EDITOR
   Widget _buildEditorTab() {
     final linesCount = _codeController.text.split('\n').length;
     final lineNumbersText = List.generate(linesCount, (i) => '${i + 1}').join('\n');
 
     return Column(
       children: [
+        if (_syntaxErrors.isNotEmpty)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            color: Colors.amber.shade900.withOpacity(0.4),
+            child: Row(
+              children: [
+                const Icon(Icons.warning_amber_rounded, color: Colors.amberAccent, size: 16),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _syntaxErrors.first,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 11, color: Colors.amberAccent),
+                  ),
+                ),
+              ],
+            ),
+          ),
         Expanded(
           child: Container(
             color: const Color(0xFF14181E),
@@ -565,7 +687,7 @@ FinAlgoritmo"""
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  width: 42,
+                  width: 40,
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   color: const Color(0xFF0D1015),
                   child: Text(
@@ -588,7 +710,7 @@ FinAlgoritmo"""
                       focusNode: _focusNode,
                       maxLines: null,
                       expands: true,
-                      onChanged: (v) => setState(() {}),
+                      onChanged: (v) => _validateSyntax(),
                       style: TextStyle(
                         fontFamily: 'monospace',
                         fontSize: _fontSize,
@@ -611,6 +733,7 @@ FinAlgoritmo"""
     );
   }
 
+  // Barra de botones inteligentes (Toolbar de 2 filas)
   Widget _buildKeyboardToolbar() {
     return Container(
       color: const Color(0xFF1A1F26),
@@ -628,7 +751,7 @@ FinAlgoritmo"""
                 _shortcutButton('Mientras', () => _insertText('Mientras  Hacer\n\t\nFinMientras', offset: -21)),
                 _shortcutButton('Escribir', () => _insertText('Escribir "";', offset: -2)),
                 _shortcutButton('Leer', () => _insertText('Leer ;', offset: -1)),
-                _shortcutButton('Definir', () => _insertText('Definir  Como Entero;', offset: -14)),
+                _shortcutButton('Definir', () => _insertText('Definir  Como Real;', offset: -12)),
               ],
             ),
           ),
@@ -640,6 +763,7 @@ FinAlgoritmo"""
               children: [
                 _symbolButton('<-', () => _insertText(' <- ')),
                 _symbolButton(';', () => _insertText(';')),
+                _symbolButton('//', () => _insertText('// ')),
                 _symbolButton('""', () => _insertText('""', offset: -1)),
                 _symbolButton('()', () => _insertText('()', offset: -1)),
                 _symbolButton('>=', () => _insertText(' >= ')),
@@ -686,6 +810,7 @@ FinAlgoritmo"""
     );
   }
 
+  // 2. PESTAÑA DEL DIAGRAMA INTERACTIVO (FIGURAS REALES PSEINT)
   Widget _buildDiagramTab() {
     final steps = _codeController.text.split('\n')
         .map((e) => e.trim())
@@ -727,6 +852,7 @@ FinAlgoritmo"""
   }
 
   Widget _renderPseintShape(String text) {
+    // Cápsula (Inicio / Fin)
     if (text.startsWith('Algoritmo') || text.startsWith('FinAlgoritmo')) {
       return Container(
         constraints: const BoxConstraints(minWidth: 170, maxWidth: 260),
@@ -744,6 +870,7 @@ FinAlgoritmo"""
       );
     }
 
+    // Rombo (Decisión)
     if (text.startsWith('Si') || text.startsWith('Mientras')) {
       return CustomPaint(
         painter: DiamondBorderPainter(color: Colors.redAccent),
@@ -767,6 +894,7 @@ FinAlgoritmo"""
       );
     }
 
+    // Paralelogramo (Entrada - Leer)
     if (text.startsWith('Leer')) {
       return CustomPaint(
         painter: ParallelogramBorderPainter(color: Colors.tealAccent),
@@ -796,6 +924,7 @@ FinAlgoritmo"""
       );
     }
 
+    // Trapecio (Salida - Escribir)
     if (text.startsWith('Escribir')) {
       return CustomPaint(
         painter: TrapezoidBorderPainter(color: Colors.amberAccent),
@@ -825,6 +954,7 @@ FinAlgoritmo"""
       );
     }
 
+    // Rectángulo (Proceso)
     return Container(
       constraints: const BoxConstraints(minWidth: 170, maxWidth: 250),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -841,6 +971,7 @@ FinAlgoritmo"""
     );
   }
 
+  // 3. PESTAÑA DE CONSOLA Y PRUEBA DE ESCRITORIO
   Widget _buildConsoleTab() {
     return Column(
       children: [
@@ -914,6 +1045,7 @@ FinAlgoritmo"""
             itemBuilder: (context, i) {
               final log = _consoleLogs[i];
               final isSys = log['type'] == 'sys';
+              final isWarn = log['type'] == 'warn';
               final isInput = log['type'] == 'in';
 
               return Container(
@@ -924,9 +1056,11 @@ FinAlgoritmo"""
                   decoration: BoxDecoration(
                     color: isSys
                         ? Colors.transparent
-                        : isInput
-                            ? const Color(0xFF1565C0)
-                            : const Color(0xFF222832),
+                        : isWarn
+                            ? Colors.amber.shade900.withOpacity(0.4)
+                            : isInput
+                                ? const Color(0xFF1565C0)
+                                : const Color(0xFF222832),
                     borderRadius: BorderRadius.circular(6),
                     border: isSys ? Border.all(color: Colors.white12) : null,
                   ),
@@ -934,7 +1068,11 @@ FinAlgoritmo"""
                     log['text']!,
                     style: TextStyle(
                       fontFamily: 'monospace',
-                      color: isSys ? Colors.white54 : Colors.white,
+                      color: isSys
+                          ? Colors.white54
+                          : isWarn
+                              ? Colors.amberAccent
+                              : Colors.white,
                       fontSize: 12.5,
                     ),
                   ),
@@ -947,6 +1085,7 @@ FinAlgoritmo"""
     );
   }
 
+  // 4. PESTAÑA DE TRADUCCIÓN A LENGUAJES REALES
   Widget _buildTranslateTab() {
     return DefaultTabController(
       length: 3,
@@ -978,16 +1117,35 @@ FinAlgoritmo"""
     return Container(
       color: const Color(0xFF14181E),
       padding: const EdgeInsets.all(16),
-      child: SingleChildScrollView(
-        child: SelectableText(
-          translatedCode,
-          style: const TextStyle(fontFamily: 'monospace', fontSize: 13, color: Color(0xFF79C0FF), height: 1.45),
-        ),
+      child: Stack(
+        children: [
+          SingleChildScrollView(
+            child: SelectableText(
+              translatedCode,
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 13, color: Color(0xFF79C0FF), height: 1.45),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: FloatingActionButton.small(
+              backgroundColor: const Color(0xFF1E88E5),
+              child: const Icon(Icons.copy_rounded, size: 18, color: Colors.white),
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: translatedCode));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Código copiado al portapapeles.')),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildProjectsAndChallengesTab() {
+  // 5. BANCO DE RETOS Y PROYECTOS GUARDADOS
+  Widget _buildChallengesTab() {
     return ListView.builder(
       padding: const EdgeInsets.all(12),
       itemCount: _savedAlgorithms.length,
@@ -1040,6 +1198,7 @@ FinAlgoritmo"""
                         _codeController.text = item['code']!;
                         _tabController.animateTo(0);
                       });
+                      _validateSyntax();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Cargado: ${item['title']}')),
                       );
@@ -1055,6 +1214,7 @@ FinAlgoritmo"""
   }
 }
 
+// Figuras geométricas oficiales de PSeInt
 class DiamondClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
