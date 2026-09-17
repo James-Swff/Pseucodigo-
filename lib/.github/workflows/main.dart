@@ -48,7 +48,6 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
   List<String> _stepLines = [];
   List<String> _syntaxErrors = [];
 
-  // Datos para el membrete universitario
   String _studentName = 'Estudiante';
   String _courseName = 'Algoritmos y Programacion';
   String _sectionCode = 'Facultad de Ingenieria';
@@ -156,7 +155,6 @@ FinAlgoritmo"""
     super.dispose();
   }
 
-  // Validador de Sintaxis PSeInt
   void _validateSyntax() {
     final text = _codeController.text;
     final lines = text.split('\n');
@@ -180,17 +178,13 @@ FinAlgoritmo"""
       if (line.startsWith('FinMientras')) openMientras--;
 
       if ((line.startsWith('Definir') || line.startsWith('Leer') || line.startsWith('Escribir') || line.contains('<-')) && !line.endsWith(';')) {
-        errors.add('Línea ${i + 1}: Posible falta de ";" al final.');
+        errors.add('Línea ${i + 1}: Falta ";" al final.');
       }
     }
 
-    if (openSi > 0) errors.add('Estructura: Hay $openSi bloque(s) "Si" sin cerrar con "FinSi".');
-    if (openSi < 0) errors.add('Estructura: Sobra un "FinSi" en el código.');
-
-    if (openPara > 0) errors.add('Estructura: Hay $openPara bucle(s) "Para" sin cerrar con "FinPara".');
-    if (openPara < 0) errors.add('Estructura: Sobra un "FinPara" en el código.');
-
-    if (openMientras > 0) errors.add('Estructura: Hay bucle "Mientras" sin cerrar con "FinMientras".');
+    if (openSi > 0) errors.add('Estructura: Falta cerrar $openSi bloque(s) "Si" con "FinSi".');
+    if (openPara > 0) errors.add('Estructura: Falta cerrar bucle "Para" con "FinPara".');
+    if (openMientras > 0) errors.add('Estructura: Falta cerrar bucle "Mientras" con "FinMientras".');
 
     setState(() {
       _syntaxErrors = errors;
@@ -219,9 +213,6 @@ FinAlgoritmo"""
       _memoryVariables.clear();
       _currentStepIndex = -1;
       _consoleLogs.add({'type': 'sys', 'text': '--- INICIO DE EJECUCION ---'});
-      if (_syntaxErrors.isNotEmpty) {
-        _consoleLogs.add({'type': 'warn', 'text': '[AVISO] Advertencias de sintaxis detectadas.'});
-      }
     });
 
     final lines = _codeController.text.split('\n');
@@ -248,7 +239,7 @@ FinAlgoritmo"""
         var varName = line.substring(4).trim();
         if (varName.endsWith(';')) varName = varName.substring(0, varName.length - 1).trim();
         vars[varName] = 16;
-        _consoleLogs.add({'type': 'in', 'text': '-> [$varName] = 16 (Entrada simulada)'});
+        _consoleLogs.add({'type': 'in', 'text': '-> [$varName] = 16 (Simulado)'});
       } else if (line.contains('<-')) {
         final parts = line.split('<-');
         final varName = parts[0].trim();
@@ -258,7 +249,7 @@ FinAlgoritmo"""
 
     setState(() {
       _memoryVariables = vars;
-      _consoleLogs.add({'type': 'sys', 'text': '--- EJECUCION FINALIZADA CON EXITO ---'});
+      _consoleLogs.add({'type': 'sys', 'text': '--- EJECUCION COMPLETADA ---'});
       _tabController.animateTo(2);
     });
   }
@@ -310,67 +301,39 @@ FinAlgoritmo"""
     final buffer = StringBuffer();
 
     if (lang == 'Python') {
-      buffer.writeln('# Traducido automaticamente a Python 3');
+      buffer.writeln('# Traducido a Python 3');
       for (var l in lines) {
         var line = l.trim();
-        if (line.startsWith('Algoritmo')) {
-          buffer.writeln('def main():');
-        } else if (line.startsWith('FinAlgoritmo')) {
-          buffer.writeln('\nif __name__ == "__main__":\n    main()');
-        } else if (line.startsWith('Escribir')) {
-          var c = line.substring(8).replaceAll(';', '').trim();
-          buffer.writeln('    print($c)');
-        } else if (line.startsWith('Leer')) {
-          var v = line.substring(4).replaceAll(';', '').trim();
-          buffer.writeln('    $v = float(input())');
-        } else if (line.contains('<-')) {
-          var parts = line.split('<-');
-          buffer.writeln('    ${parts[0].trim()} = ${parts[1].replaceAll(";", "").trim()}');
-        } else if (line.startsWith('Si') && line.contains('Entonces')) {
-          var cond = line.substring(2, line.indexOf('Entonces')).replaceAll('Y', 'and').replaceAll('O', 'or').trim();
-          buffer.writeln('    if $cond:');
-        } else if (line.startsWith('SiNo')) {
-          buffer.writeln('    else:');
-        } else if (line.startsWith('Para')) {
-          buffer.writeln('    for i in range(1, 13):');
+        if (line.startsWith('Algoritmo')) buffer.writeln('def main():');
+        else if (line.startsWith('FinAlgoritmo')) buffer.writeln('\nif __name__ == "__main__":\n    main()');
+        else if (line.startsWith('Escribir')) buffer.writeln('    print(${line.substring(8).replaceAll(';', '').trim()})');
+        else if (line.startsWith('Leer')) buffer.writeln('    ${line.substring(4).replaceAll(';', '').trim()} = float(input())');
+        else if (line.contains('<-')) {
+          var p = line.split('<-');
+          buffer.writeln('    ${p[0].trim()} = ${p[1].replaceAll(";", "").trim()}');
         }
       }
     } else if (lang == 'C++') {
       buffer.writeln('#include <iostream>\nusing namespace std;\n\nint main() {');
       for (var l in lines) {
         var line = l.trim();
-        if (line.startsWith('Escribir')) {
-          var c = line.substring(8).replaceAll(';', '').trim();
-          buffer.writeln('    cout << $c << endl;');
-        } else if (line.startsWith('Leer')) {
-          var v = line.substring(4).replaceAll(';', '').trim();
-          buffer.writeln('    cin >> $v;');
-        } else if (line.contains('<-')) {
-          var parts = line.split('<-');
-          buffer.writeln('    ${parts[0].trim()} = ${parts[1].replaceAll(";", "").trim()};');
-        } else if (line.startsWith('Si') && line.contains('Entonces')) {
-          var cond = line.substring(2, line.indexOf('Entonces')).trim();
-          buffer.writeln('    if ($cond) {');
-        } else if (line.startsWith('SiNo')) {
-          buffer.writeln('    } else {');
-        } else if (line.startsWith('FinSi')) {
-          buffer.writeln('    }');
+        if (line.startsWith('Escribir')) buffer.writeln('    cout << ${line.substring(8).replaceAll(';', '').trim()} << endl;');
+        else if (line.startsWith('Leer')) buffer.writeln('    cin >> ${line.substring(4).replaceAll(';', '').trim()};');
+        else if (line.contains('<-')) {
+          var p = line.split('<-');
+          buffer.writeln('    ${p[0].trim()} = ${p[1].replaceAll(";", "").trim()};');
         }
       }
       buffer.writeln('    return 0;\n}');
     } else if (lang == 'Java') {
-      buffer.writeln('import java.util.Scanner;\n\npublic class Algoritmo {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);');
+      buffer.writeln('import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);');
       for (var l in lines) {
         var line = l.trim();
-        if (line.startsWith('Escribir')) {
-          var c = line.substring(8).replaceAll(';', '').trim();
-          buffer.writeln('        System.out.println($c);');
-        } else if (line.startsWith('Leer')) {
-          var v = line.substring(4).replaceAll(';', '').trim();
-          buffer.writeln('        double $v = sc.nextDouble();');
-        } else if (line.contains('<-')) {
-          var parts = line.split('<-');
-          buffer.writeln('        ${parts[0].trim()} = ${parts[1].replaceAll(";", "").trim()};');
+        if (line.startsWith('Escribir')) buffer.writeln('        System.out.println(${line.substring(8).replaceAll(';', '').trim()});');
+        else if (line.startsWith('Leer')) buffer.writeln('        double ${line.substring(4).replaceAll(';', '').trim()} = sc.nextDouble();');
+        else if (line.contains('<-')) {
+          var p = line.split('<-');
+          buffer.writeln('        ${p[0].trim()} = ${p[1].replaceAll(";", "").trim()};');
         }
       }
       buffer.writeln('    }\n}');
@@ -378,7 +341,6 @@ FinAlgoritmo"""
     return buffer.toString();
   }
 
-  // Generador del PDF con Membrete Universitario Completo
   Future<pw.Document> _buildAcademicPdf() async {
     final pdf = pw.Document();
     final code = _codeController.text;
@@ -393,7 +355,6 @@ FinAlgoritmo"""
         margin: const pw.EdgeInsets.all(26),
         build: (pw.Context context) {
           return [
-            // Membrete Academico
             pw.Container(
               padding: const pw.EdgeInsets.all(10),
               decoration: pw.BoxDecoration(
@@ -463,7 +424,7 @@ FinAlgoritmo"""
                   border = PdfColors.blue900;
                   radius = 16;
                 } else if (text.startsWith('Leer')) {
-                  typeTag = 'ENTRADA [PARALELOGRAMO /]';
+                  typeTag = 'ENTRADA [PARALELOGRAMO]';
                   bg = PdfColors.teal50;
                   border = PdfColors.teal800;
                 } else if (text.startsWith('Escribir')) {
@@ -471,7 +432,7 @@ FinAlgoritmo"""
                   bg = PdfColors.amber50;
                   border = PdfColors.amber800;
                 } else if (text.startsWith('Si') || text.startsWith('Mientras')) {
-                  typeTag = 'DECISION [ROMBO < >]';
+                  typeTag = 'DECISION [ROMBO]';
                   bg = PdfColors.red50;
                   border = PdfColors.red800;
                 }
@@ -516,7 +477,6 @@ FinAlgoritmo"""
     return pdf;
   }
 
-  // Diálogo para editar datos del membrete antes de exportar
   void _showStudentHeaderDialog({required bool isShare}) {
     final nameCtrl = TextEditingController(text: _studentName);
     final courseCtrl = TextEditingController(text: _courseName);
@@ -654,7 +614,6 @@ FinAlgoritmo"""
     );
   }
 
-  // 1. PESTAÑA DEL EDITOR
   Widget _buildEditorTab() {
     final linesCount = _codeController.text.split('\n').length;
     final lineNumbersText = List.generate(linesCount, (i) => '${i + 1}').join('\n');
@@ -733,7 +692,6 @@ FinAlgoritmo"""
     );
   }
 
-  // Barra de botones inteligentes (Toolbar de 2 filas)
   Widget _buildKeyboardToolbar() {
     return Container(
       color: const Color(0xFF1A1F26),
@@ -810,7 +768,6 @@ FinAlgoritmo"""
     );
   }
 
-  // 2. PESTAÑA DEL DIAGRAMA INTERACTIVO (FIGURAS REALES PSEINT)
   Widget _buildDiagramTab() {
     final steps = _codeController.text.split('\n')
         .map((e) => e.trim())
@@ -852,7 +809,6 @@ FinAlgoritmo"""
   }
 
   Widget _renderPseintShape(String text) {
-    // Cápsula (Inicio / Fin)
     if (text.startsWith('Algoritmo') || text.startsWith('FinAlgoritmo')) {
       return Container(
         constraints: const BoxConstraints(minWidth: 170, maxWidth: 260),
@@ -870,7 +826,6 @@ FinAlgoritmo"""
       );
     }
 
-    // Rombo (Decisión)
     if (text.startsWith('Si') || text.startsWith('Mientras')) {
       return CustomPaint(
         painter: DiamondBorderPainter(color: Colors.redAccent),
@@ -894,7 +849,6 @@ FinAlgoritmo"""
       );
     }
 
-    // Paralelogramo (Entrada - Leer)
     if (text.startsWith('Leer')) {
       return CustomPaint(
         painter: ParallelogramBorderPainter(color: Colors.tealAccent),
@@ -924,7 +878,6 @@ FinAlgoritmo"""
       );
     }
 
-    // Trapecio (Salida - Escribir)
     if (text.startsWith('Escribir')) {
       return CustomPaint(
         painter: TrapezoidBorderPainter(color: Colors.amberAccent),
@@ -954,7 +907,6 @@ FinAlgoritmo"""
       );
     }
 
-    // Rectángulo (Proceso)
     return Container(
       constraints: const BoxConstraints(minWidth: 170, maxWidth: 250),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -971,7 +923,6 @@ FinAlgoritmo"""
     );
   }
 
-  // 3. PESTAÑA DE CONSOLA Y PRUEBA DE ESCRITORIO
   Widget _buildConsoleTab() {
     return Column(
       children: [
@@ -1045,7 +996,6 @@ FinAlgoritmo"""
             itemBuilder: (context, i) {
               final log = _consoleLogs[i];
               final isSys = log['type'] == 'sys';
-              final isWarn = log['type'] == 'warn';
               final isInput = log['type'] == 'in';
 
               return Container(
@@ -1056,11 +1006,9 @@ FinAlgoritmo"""
                   decoration: BoxDecoration(
                     color: isSys
                         ? Colors.transparent
-                        : isWarn
-                            ? Colors.amber.shade900.withOpacity(0.4)
-                            : isInput
-                                ? const Color(0xFF1565C0)
-                                : const Color(0xFF222832),
+                        : isInput
+                            ? const Color(0xFF1565C0)
+                            : const Color(0xFF222832),
                     borderRadius: BorderRadius.circular(6),
                     border: isSys ? Border.all(color: Colors.white12) : null,
                   ),
@@ -1068,11 +1016,7 @@ FinAlgoritmo"""
                     log['text']!,
                     style: TextStyle(
                       fontFamily: 'monospace',
-                      color: isSys
-                          ? Colors.white54
-                          : isWarn
-                              ? Colors.amberAccent
-                              : Colors.white,
+                      color: isSys ? Colors.white54 : Colors.white,
                       fontSize: 12.5,
                     ),
                   ),
@@ -1085,7 +1029,6 @@ FinAlgoritmo"""
     );
   }
 
-  // 4. PESTAÑA DE TRADUCCIÓN A LENGUAJES REALES
   Widget _buildTranslateTab() {
     return DefaultTabController(
       length: 3,
@@ -1144,7 +1087,6 @@ FinAlgoritmo"""
     );
   }
 
-  // 5. BANCO DE RETOS Y PROYECTOS GUARDADOS
   Widget _buildChallengesTab() {
     return ListView.builder(
       padding: const EdgeInsets.all(12),
@@ -1214,7 +1156,6 @@ FinAlgoritmo"""
   }
 }
 
-// Figuras geométricas oficiales de PSeInt
 class DiamondClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
