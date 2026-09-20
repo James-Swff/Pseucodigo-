@@ -328,8 +328,9 @@ FinAlgoritmo"""
 
     for (var rawLine in lines) {
       final line = rawLine.trim();
-      if (line.isEmpty || line.startsWith('//')) continue;
-      if (line.startsWith('Algoritmo') || line.startsWith('FinAlgoritmo')) continue;
+      if (line.isEmpty || line.startsWith('//') || line.startsWith('Algoritmo') || line.startsWith('FinAlgoritmo')) {
+        continue;
+      }
 
       if (line.startsWith('Si ') && line.contains('Entonces')) {
         String condText = line.substring(3, line.indexOf('Entonces')).trim();
