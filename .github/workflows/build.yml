@@ -33,7 +33,7 @@ jobs:
         run: |
           if [ -f "app_icon.png" ]; then
             flutter pub add --dev flutter_launcher_icons
-            printf "\nflutter_launcher_icons:\n  android: true\n  image_path: \"app_icon.png\"\n  min_sdk_android: 21\n" >> pubspec.yaml
+            printf "flutter_launcher_icons:\n  android: true\n  image_path: \"app_icon.png\"\n  min_sdk_android: 21\n" > flutter_launcher_icons.yaml
             dart run flutter_launcher_icons
           fi
 
