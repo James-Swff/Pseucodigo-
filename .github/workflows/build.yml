@@ -20,7 +20,7 @@ jobs:
         with:
           flutter-version: '3.24.5'
 
-      - run: flutter create --platforms=android .
+      - run: flutter create --project-name pseudocodigo_app --platforms=android .
       - run: git checkout -- lib/main.dart || true
       - run: flutter pub add http pdf printing
       - run: flutter build apk --release --no-tree-shake-icons
@@ -29,4 +29,3 @@ jobs:
         with:
           name: pseudocode-pro-apk
           path: build/app/outputs/flutter-apk/app-release.apk
-          
