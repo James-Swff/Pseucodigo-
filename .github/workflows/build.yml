@@ -1,5 +1,4 @@
 name: Compilar APK
-
 on:
   push:
     branches: [ main, master ]
@@ -23,10 +22,9 @@ jobs:
       - run: flutter create --platforms=android .
       - run: git checkout -- lib/main.dart || true
       - run: flutter pub add http pdf printing
-      - run: flutter build apk --release --no-tree-shake-icons
+      - run: flutter build apk --release --no-tree-shake-icons --enable-experiment=dot-shorthands
 
       - uses: actions/upload-artifact@v4
         with:
           name: pseudocode-pro-apk
           path: build/app/outputs/flutter-apk/app-release.apk
-          
