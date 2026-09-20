@@ -22,13 +22,10 @@ channel: 'stable'
 run: flutter create --platforms=android .
 ​- name: Instalar paquetes
 run: flutter pub add http pdf printing
-​- name: Configurar icono
+​- name: Corregir sintaxis experimental de Dart
 run: |
-if [ -f "app_icon.png" ]; then
-flutter pub add --dev flutter_launcher_icons
-printf "flutter_launcher_icons:\n  android: true\n  image_path: "app_icon.png"\n  min_sdk_android: 21\n" > flutter_launcher_icons.yaml
-dart run flutter_launcher_icons
-fi
+sed -i 's/.fromSeed/ColorScheme.fromSeed/g' lib/main.dart || true
+sed -i 's/.center/MainAxisAlignment.center/g' lib/main.dart || true
 ​- name: Compilar APK
 run: flutter build apk --release --no-tree-shake-icons
 ​- name: Subir APK
