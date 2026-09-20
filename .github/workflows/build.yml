@@ -12,20 +12,16 @@ uses: actions/checkout@v4
 ​- name: Configurar Java
 uses: actions/setup-java@v4
 with:
-distribution: 'zulu'
-java-version: '17'
+distribution: zulu
+java-version: 17
 ​- name: Configurar Flutter
 uses: subosito/flutter-action@v2
 with:
-channel: 'stable'
+channel: stable
 ​- name: Crear estructura Android
 run: flutter create --platforms=android .
 ​- name: Instalar paquetes
 run: flutter pub add http pdf printing
-​- name: Corregir sintaxis experimental de Dart
-run: |
-sed -i 's/.fromSeed/ColorScheme.fromSeed/g' lib/main.dart || true
-sed -i 's/.center/MainAxisAlignment.center/g' lib/main.dart || true
 ​- name: Compilar APK
 run: flutter build apk --release --no-tree-shake-icons
 ​- name: Subir APK
