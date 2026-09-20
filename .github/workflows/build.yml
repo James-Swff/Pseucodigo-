@@ -324,9 +324,6 @@ Map<String, double> sampleInputs = {
 'n2': 10.0,
 'num': 7.0,
 'nota': 17.0,
-'largo': 25.0,
-'ancho': 25.0,
-'alto': 25.0,
 'a': 25.0,
 'b': 15.0,
 };
@@ -374,10 +371,10 @@ _consoleLogs.add({'type': 'out', 'text': printVal});
 } else if (line.startsWith('Leer')) {
 var varName = line.substring(4).trim();
 if (varName.endsWith(';')) varName = varName.substring(0, varName.length - 1).trim();
-double val = sampleInputs[varName.toLowerCase()] ?? 25.0;
+double val = sampleInputs[varName.toLowerCase()] ?? 15.0;
 vars[varName] = val;
 String printVal = (val == val.roundToDouble()) ? '{val.toInt()}' : '$val';
-_consoleLogs.add({'type': 'in', 'text': '-> [$varName] = $printVal (Entrada simulada)'});
+_consoleLogs.add({'type': 'in', 'text': '-> [$varName] = $printVal (Dato leido)'});
 } else if (line.contains('<-')) {
 final parts = line.split('<-');
 final varName = parts[0].trim();
@@ -421,8 +418,8 @@ if (line.startsWith('Escribir')) {
 _consoleLogs.add({'type': 'out', 'text': line.replaceAll(';', '')});
 } else if (line.startsWith('Leer')) {
 final v = line.replaceAll('Leer', '').replaceAll(';', '').trim();
-_memoryVariables[v] = 25;
-_consoleLogs.add({'type': 'in', 'text': 'Leido [$v] <- 25'});
+_memoryVariables[v] = 20;
+_consoleLogs.add({'type': 'in', 'text': 'Leido [$v] <- 20'});
 } else if (line.contains('<-')) {
 final parts = line.split('<-');
 final v = parts[0].trim();
@@ -509,11 +506,3 @@ Tu rol es explicar conceptos de PSeInt, corregir algoritmos o crearlos siguiendo
 INSTRUCCION DEL USUARIO: $instruction
 ${customInput != null && customInput.isNotEmpty ? "DETALLE ADICIONAL: $customInput" : ""}
 CODIGO FUENTE ACTUAL EN EL EDITOR:
-      - name: Compilar APK
-        run: flutter build apk --release --extra-front-end-options=--enable-experiment=dot-shorthands
-
-      - name: Subir APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release
-          path: build/app/outputs/flutter-apk/app-release.apk
