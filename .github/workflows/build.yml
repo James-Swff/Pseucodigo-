@@ -1,38 +1,47 @@
 name: Compilar APK
-​on:
-push:
-branches: [ main, master ]
-workflow_dispatch:
-​jobs:
-build:
-runs-on: ubuntu-latest
-steps:
-- name: Descargar codigo
-uses: actions/checkout@v4
-​- name: Configurar Java
-uses: actions/setup-java@v4
-with:
-distribution: 'zulu'
-java-version: '17'
-​- name: Configurar Flutter
-uses: subosito/flutter-action@v2
-with:
-channel: 'stable'
-​- name: Crear estructura Android
-run: flutter create --platforms=android .
-​- name: Instalar paquetes
-run: flutter pub add http pdf printing
-​- name: Configurar icono
-run: |
-if [ -f "app_icon.png" ]; then
-flutter pub add --dev flutter_launcher_icons
-printf "flutter_launcher_icons:\n  android: true\n  image_path: "app_icon.png"\n  min_sdk_android: 21\n" > flutter_launcher_icons.yaml
-dart run flutter_launcher_icons
-fi
-​- name: Compilar APK
-run: flutter build apk --release --no-tree-shake-icons
-​- name: Subir APK
-uses: actions/upload-artifact@v4
-with:
-name: pseudocode-pro-apk
-path: build/app/outputs/flutter-apk/app-release.apk
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Configurar Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Crear estructura Android
+        run: flutter create --platforms=android .
+
+      - name: Instalar paquetes
+        run: flutter pub add http pdf printing
+
+      - name: Configurar icono
+        run: |
+          if [ -f "app_icon.png" ]; then
+            flutter pub add --dev flutter_launcher_icons
+            printf "flutter_launcher_icons:\n  android: true\n  image_path: \"app_icon.png\"\n  min_sdk_android: 21\n" > flutter_launcher_icons.yaml
+            dart run flutter_launcher_icons
+          fi
+
+      - name: Compilar APK
+        run: flutter build apk --release --no-tree-shake-icons
+
+      - name: Subir APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: pseudocode-pro-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
