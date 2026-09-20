@@ -21,6 +21,7 @@ jobs:
           channel: stable
 
       - run: flutter create --platforms=android .
+      - run: git checkout -- lib/main.dart || true
       - run: flutter pub add http pdf printing
       - run: flutter build apk --release --no-tree-shake-icons
 
