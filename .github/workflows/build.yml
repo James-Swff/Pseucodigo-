@@ -1,4 +1,5 @@
 name: Compilar APK
+
 on:
   push:
     branches: [ main, master ]
@@ -17,14 +18,15 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          channel: stable
+          flutter-version: '3.24.5'
 
       - run: flutter create --platforms=android .
       - run: git checkout -- lib/main.dart || true
       - run: flutter pub add http pdf printing
-      - run: flutter build apk --release --no-tree-shake-icons --enable-experiment=dot-shorthands
+      - run: flutter build apk --release --no-tree-shake-icons
 
       - uses: actions/upload-artifact@v4
         with:
           name: pseudocode-pro-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+          
