@@ -1,39 +1,34 @@
 name: Compilar APK
-on:
+​on:
 push:
 branches: [ main, master ]
 workflow_dispatch:
-jobs:
+​jobs:
 build:
 runs-on: ubuntu-latest
 steps:
 - name: Descargar codigo
 uses: actions/checkout@v4
-- name: Configurar Java
+​- name: Configurar Java
 uses: actions/setup-java@v4
 with:
 distribution: 'zulu'
 java-version: '17'
-- name: Configurar Flutter
+​- name: Configurar Flutter
 uses: subosito/flutter-action@v2
 with:
 channel: 'stable'
-- name: Crear estructura base Android
+​- name: Crear estructura base Android
 run: flutter create --platforms=android .
-- name: Instalar paquetes necesarios
+​- name: Instalar dependencias e icono
 run: |
 flutter pub add http pdf printing
 if [ -f "app_icon.png" ]; then
 flutter pub add --dev flutter_launcher_icons
-cat << 'ICON_CFG' >> pubspec.yaml
-flutter_launcher_icons:
-android: "launcher_icon"
-image_path: "app_icon.png"
-min_sdk_android: 21
-ICON_CFG
+printf "\nflutter_launcher_icons:\n  android: true\n  image_path: "app_icon.png"\n  min_sdk_android: 21\n" >> pubspec.yaml
 dart run flutter_launcher_icons
 fi
-- name: Escribir aplicacion PseudoCode Pro Final
+​- name: Escribir aplicacion PSeInt Pro Final
 run: |
 mkdir -p lib
 cat << 'EOF' > lib/main.dart
@@ -44,12 +39,12 @@ import 'package:http/http.dart' as http;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-void main() {
+​void main() {
 runApp(const PseudoCodeApp());
 }
-class PseudoCodeApp extends StatelessWidget {
+​class PseudoCodeApp extends StatelessWidget {
 const PseudoCodeApp({super.key});
-@override
+​@override
 Widget build(BuildContext context) {
 return MaterialApp(
 title: 'PseudoCode Studio Pro',
@@ -66,26 +61,26 @@ home: const MainScreen(),
 );
 }
 }
-class MainScreen extends StatefulWidget {
+​class MainScreen extends StatefulWidget {
 const MainScreen({super.key});
-@override
+​@override
 State<MainScreen> createState() => _MainScreenState();
 }
-class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateMixin {
+​class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateMixin {
 late TabController _tabController;
 final TextEditingController _codeController = TextEditingController();
 final FocusNode _focusNode = FocusNode();
-double _fontSize = 14.0;
+​double _fontSize = 14.0;
 final List<Map<String, String>> _consoleLogs = [];
 Map<String, dynamic> _memoryVariables = {};
 int _currentStepIndex = -1;
 List<String> _stepLines = [];
 List<String> _syntaxErrors = [];
-String _studentName = 'Estudiante';
+​String _studentName = 'Estudiante';
 String _courseName = 'Algoritmos y Programacion';
 String _sectionCode = 'Facultad de Ingenieria';
-String _geminiApiKey = '';
-final List<Map<String, String>> _savedAlgorithms = [
+​String _geminiApiKey = '';
+​final List<Map<String, String>> _savedAlgorithms = [
 {
 'unit': 'Unidad 1: Secuencial (Sem. 1-6)',
 'title': '1. Conversión de Temperatura',
@@ -129,11 +124,11 @@ FinAlgoritmo"""
 Definir horasTrabajadas Como Entero;
 Definir pagoPorHora, sueldoBruto, horasExtras, pagoExtras Como Real;
 Definir descuentoSalud, bonificacion, sueldoNeto Como Real;
-Escribir "Ingrese horas trabajadas:";
+​Escribir "Ingrese horas trabajadas:";
 Leer horasTrabajadas;
 Escribir "Ingrese tarifa por hora:";
 Leer pagoPorHora;
-Si horasTrabajadas > 40 Entonces
+​Si horasTrabajadas > 40 Entonces
 horasExtras <- horasTrabajadas - 40;
 pagoExtras <- horasExtras * (pagoPorHora * 1.5);
 sueldoBruto <- (40 * pagoPorHora) + pagoExtras;
@@ -142,14 +137,14 @@ horasExtras <- 0;
 pagoExtras <- 0;
 sueldoBruto <- horasTrabajadas * pagoPorHora;
 FinSi
-descuentoSalud <- sueldoBruto * 0.09;
-Si sueldoBruto < 1200 Entonces
+​descuentoSalud <- sueldoBruto * 0.09;
+​Si sueldoBruto < 1200 Entonces
 bonificacion <- 100;
 SiNo
 bonificacion <- 50;
 FinSi
-sueldoNeto <- (sueldoBruto - descuentoSalud) + bonificacion;
-Escribir "Sueldo Bruto:";
+​sueldoNeto <- (sueldoBruto - descuentoSalud) + bonificacion;
+​Escribir "Sueldo Bruto:";
 Escribir sueldoBruto;
 Escribir "Descuento Salud (9%):";
 Escribir descuentoSalud;
@@ -220,21 +215,21 @@ Escribir nota;
 FinAlgoritmo"""
 }
 ];
-@override
+​@override
 void initState() {
 super.initState();
 _tabController = TabController(length: 5, vsync: this);
 _codeController.text = _savedAlgorithms[0]['code']!;
 _validateSyntax();
 }
-@override
+​@override
 void dispose() {
 _tabController.dispose();
 _codeController.dispose();
 _focusNode.dispose();
 super.dispose();
 }
-void _validateSyntax() {
+​void _validateSyntax() {
 final lines = _codeController.text.split('\n');
 final List<String> errors = [];
 int openSi = 0;
@@ -242,38 +237,38 @@ int openPara = 0;
 int openMientras = 0;
 int openSegun = 0;
 int openRepetir = 0;
-for (int i = 0; i < lines.length; i++) {
+​for (int i = 0; i < lines.length; i++) {
 final line = lines[i].trim();
 if (line.isEmpty || line.startsWith('//')) continue;
-if (line.startsWith('Si ') && line.contains('Entonces')) openSi++;
+​if (line.startsWith('Si ') && line.contains('Entonces')) openSi++;
 if (line.startsWith('FinSi')) openSi--;
-if (line.startsWith('Para ') && line.contains('Hacer')) openPara++;
+​if (line.startsWith('Para ') && line.contains('Hacer')) openPara++;
 if (line.startsWith('FinPara')) openPara--;
-if (line.startsWith('Mientras ') && line.contains('Hacer')) openMientras++;
+​if (line.startsWith('Mientras ') && line.contains('Hacer')) openMientras++;
 if (line.startsWith('FinMientras')) openMientras--;
-if (line.startsWith('Segun ') && line.contains('Hacer')) openSegun++;
+​if (line.startsWith('Segun ') && line.contains('Hacer')) openSegun++;
 if (line.startsWith('FinSegun')) openSegun--;
-if (line.startsWith('Repetir')) openRepetir++;
+​if (line.startsWith('Repetir')) openRepetir++;
 if (line.startsWith('Hasta Que')) openRepetir--;
-if ((line.startsWith('Definir') || line.startsWith('Leer') || line.startsWith('Escribir') || line.contains('<-')) && !line.endsWith(';')) {
+​if ((line.startsWith('Definir') || line.startsWith('Leer') || line.startsWith('Escribir') || line.contains('<-')) && !line.endsWith(';')) {
 errors.add('Línea ${i + 1}: Falta ";" al final.');
 }
 }
-if (openSi > 0) errors.add('Unidad 2: Falta cerrar bloque "Si" con "FinSi".');
+​if (openSi > 0) errors.add('Unidad 2: Falta cerrar bloque "Si" con "FinSi".');
 if (openSegun > 0) errors.add('Unidad 2: Falta cerrar condicional múltiple con "FinSegun".');
 if (openPara > 0) errors.add('Unidad 3: Falta cerrar bucle "Para" con "FinPara".');
 if (openMientras > 0) errors.add('Unidad 3: Falta cerrar bucle "Mientras" con "FinMientras".');
 if (openRepetir > 0) errors.add('Unidad 3: Falta cerrar bloque "Repetir" con "Hasta Que".');
-setState(() {
+​setState(() {
 _syntaxErrors = errors;
 });
 }
-void _insertText(String text, {int offset = 0}) {
+​void _insertText(String text, {int offset = 0}) {
 final currentText = _codeController.text;
 final selection = _codeController.selection;
 final start = selection.start >= 0 ? selection.start : currentText.length;
 final end = selection.end >= 0 ? selection.end : currentText.length;
-final newText = currentText.replaceRange(start, end, text);
+​final newText = currentText.replaceRange(start, end, text);
 _codeController.value = TextEditingValue(
 text: newText,
 selection: TextSelection.collapsed(offset: start + text.length + offset),
@@ -281,10 +276,10 @@ selection: TextSelection.collapsed(offset: start + text.length + offset),
 _validateSyntax();
 _focusNode.requestFocus();
 }
-double _evalMath(String expr, Map<String, dynamic> vars) {
+​double _evalMath(String expr, Map<String, dynamic> vars) {
 return FormulaParser.calculate(expr, vars);
 }
-bool _evalCondition(String cond, Map<String, dynamic> vars) {
+​bool _evalCondition(String cond, Map<String, dynamic> vars) {
 String c = cond.trim();
 for (String op in ['>=', '<=', '', '!=', '>', '<']) {
 if (c.contains(op)) {
@@ -303,7 +298,7 @@ case '<': return left < right;
 }
 return true;
 }
-void _runAlgorithm() {
+​void _runAlgorithm() {
 _validateSyntax();
 setState(() {
 _consoleLogs.clear();
@@ -311,9 +306,9 @@ _memoryVariables.clear();
 _currentStepIndex = -1;
 _consoleLogs.add({'type': 'sys', 'text': '--- INICIO DE EJECUCION ---'});
 });
-final lines = _codeController.text.split('\n');
+​final lines = _codeController.text.split('\n');
 final Map<String, dynamic> vars = {};
-Map<String, double> sampleInputs = {
+​Map<String, double> sampleInputs = {
 'celsius': 30.0,
 'totalconsumo': 120.0,
 'montopagado': 150.0,
@@ -327,33 +322,33 @@ Map<String, double> sampleInputs = {
 'a': 25.0,
 'b': 15.0,
 };
-bool skipBranch = false;
+​bool skipBranch = false;
 List<bool> conditionStack = [];
-for (var rawLine in lines) {
+​for (var rawLine in lines) {
 final line = rawLine.trim();
 if (line.isEmpty || line.startsWith('//') || line.startsWith('Algoritmo') || line.startsWith('FinAlgoritmo')) {
 continue;
 }
-if (line.startsWith('Si ') && line.contains('Entonces')) {
+​if (line.startsWith('Si ') && line.contains('Entonces')) {
 String condText = line.substring(3, line.indexOf('Entonces')).trim();
 bool condResult = _evalCondition(condText, vars);
 conditionStack.add(condResult);
 skipBranch = !condResult;
 continue;
 }
-if (line.startsWith('SiNo')) {
+​if (line.startsWith('SiNo')) {
 if (conditionStack.isNotEmpty) {
 skipBranch = conditionStack.last;
 }
 continue;
 }
-if (line.startsWith('FinSi')) {
+​if (line.startsWith('FinSi')) {
 if (conditionStack.isNotEmpty) conditionStack.removeLast();
 skipBranch = conditionStack.isNotEmpty ? !conditionStack.last : false;
 continue;
 }
-if (skipBranch) continue;
-if (line.startsWith('Escribir')) {
+​if (skipBranch) continue;
+​if (line.startsWith('Escribir')) {
 var content = line.substring(8).trim();
 if (content.endsWith(';')) content = content.substring(0, content.length - 1).trim();
 if (content.startsWith('"') && content.endsWith('"')) {
@@ -383,18 +378,18 @@ double result = _evalMath(expr, vars);
 vars[varName] = (result == result.roundToDouble()) ? result.toInt() : double.parse(result.toStringAsFixed(2));
 }
 }
-setState(() {
+​setState(() {
 _memoryVariables = vars;
 _consoleLogs.add({'type': 'sys', 'text': '--- EJECUCION COMPLETADA CON EXITO ---'});
 _tabController.animateTo(2);
 });
 }
-void _startStepByStep() {
+​void _startStepByStep() {
 final lines = _codeController.text.split('\n')
 .map((e) => e.trim())
 .where((e) => e.isNotEmpty && !e.startsWith('//'))
 .toList();
-setState(() {
+​setState(() {
 _stepLines = lines;
 _currentStepIndex = 0;
 _memoryVariables.clear();
@@ -403,7 +398,7 @@ _consoleLogs.add({'type': 'sys', 'text': '--- MODO PASO A PASO (PRUEBA DE ESCRIT
 _tabController.animateTo(2);
 });
 }
-void _nextStep() {
+​void _nextStep() {
 if (_currentStepIndex >= _stepLines.length - 1) {
 setState(() {
 _consoleLogs.add({'type': 'sys', 'text': '--- FIN DEL ALGORITMO ---'});
@@ -411,10 +406,10 @@ _currentStepIndex = -1;
 });
 return;
 }
-setState(() {
+​setState(() {
 _currentStepIndex++;
 final line = _stepLines[_currentStepIndex];
-if (line.startsWith('Escribir')) {
+​if (line.startsWith('Escribir')) {
 _consoleLogs.add({'type': 'out', 'text': line.replaceAll(';', '')});
 } else if (line.startsWith('Leer')) {
 final v = line.replaceAll('Leer', '').replaceAll(';', '').trim();
@@ -428,10 +423,10 @@ _memoryVariables[v] = (res == res.roundToDouble()) ? res.toInt() : double.parse(
 }
 });
 }
-String _translateCode(String lang) {
+​String _translateCode(String lang) {
 final lines = _codeController.text.split('\n');
 final buffer = StringBuffer();
-if (lang == 'Python') {
+​if (lang == 'Python') {
 buffer.writeln('# Traducido a Python 3');
 for (var l in lines) {
 var line = l.trim();
@@ -471,12 +466,12 @@ buffer.writeln('    }\n}');
 }
 return buffer.toString();
 }
-Future<void> _showAiTutorDialog() async {
+​Future<void> _showAiTutorDialog() async {
 final keyController = TextEditingController(text: _geminiApiKey);
 final promptController = TextEditingController();
 String aiResponse = '';
 bool isLoading = false;
-showModalBottomSheet(
+​showModalBottomSheet(
 context: context,
 isScrollControlled: true,
 backgroundColor: const Color(0xFF161B22),
@@ -495,14 +490,14 @@ aiResponse = '⚠️ Ingrese su API Key gratuita de Gemini (Google AI Studio) pa
 return;
 }
 _geminiApiKey = key;
-setModalState(() {
+​setModalState(() {
 isLoading = true;
 aiResponse = '';
 });
-final currentCode = _codeController.text;
+​final currentCode = _codeController.text;
 final fullPrompt = """
 Eres el Tutor IA oficial de PseudoCode Studio Pro (desarrollado por aethell_labs) para estudiantes de ingeniería.
 Tu rol es explicar conceptos de PSeInt, corregir algoritmos o crearlos siguiendo el estándar universitario estricto de PSeInt.
-INSTRUCCION DEL USUARIO: $instruction
+​INSTRUCCION DEL USUARIO: $instruction
 ${customInput != null && customInput.isNotEmpty ? "DETALLE ADICIONAL: $customInput" : ""}
 CODIGO FUENTE ACTUAL EN EL EDITOR:
