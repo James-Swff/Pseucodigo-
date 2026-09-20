@@ -30,12 +30,16 @@ jobs:
           fi
           flutter pub add http pdf printing
 
+      - name: Corregir errores de sintaxis en main.dart
+        run: |
+          sed -i 's/\.fromSeed/ColorScheme.fromSeed/g' lib/main.dart
+          sed -i 's/\.center/MainAxisAlignment.center/g' lib/main.dart
+
       - name: Compilar APK
-        run: flutter build apk --release
+        run: flutter build apk --release --extra-front-end-options=--enable-experiment=dot-shorthands
 
       - name: Subir APK
         uses: actions/upload-artifact@v4
         with:
           name: app-release
           path: build/app/outputs/flutter-apk/app-release.apk
-          
